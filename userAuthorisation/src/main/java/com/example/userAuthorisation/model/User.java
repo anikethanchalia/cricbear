@@ -4,7 +4,7 @@ import jakarta.annotation.Generated;
 import jakarta.persistence.*;
 
 @Entity
-@Table(name = "users")
+@Table(name = "USERS")
 public class User {
     @Column(name = "uid")
     @Id
