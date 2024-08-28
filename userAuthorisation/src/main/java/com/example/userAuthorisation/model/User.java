@@ -20,16 +20,20 @@ public class User {
     @Column(name = "email")
     private String email;
 
+    @Column(name = "gender")
+    private String gender;
+
     @Column(name = "role")
     private Role role;
 
     public User() {
 
     }
-    public User(String username, String password, String email, Role role) {
+    public User(String username, String password, String email, String gender, Role role) {
         this.username = username;
         this.password = password;
         this.email = email;
+        this.gender = gender;
         this.role = role;
     }
 
@@ -63,6 +67,14 @@ public class User {
 
     public void setEmail(String email) {
         this.email = email;
+    }
+
+    public String getGender() {
+        return gender;
+    }
+
+    public void setGender(String gender) {
+        this.gender = gender;
     }
 
     public Role getRole() {
