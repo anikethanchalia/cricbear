@@ -1,67 +1,49 @@
 package com.example.userAuthorisation.controller;
 
+import com.example.userAuthorisation.model.Role;
 import com.example.userAuthorisation.model.User;
 import com.example.userAuthorisation.service.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
-import com.example.userAuthorisation.model.Role;
 import java.util.List;
+import java.util.Map;
 
 @RestController
-@RequestMapping("/api/users")
+@RequestMapping("/user")
 public class UserController {
 
     @Autowired
     private UserService userService;
 
-    // Register a new user
-    @PostMapping("/register")
-    public ResponseEntity<User> register(@RequestBody User user) {
-        User registeredUser = userService.register(user);
-        return ResponseEntity.ok(registeredUser);
-    }
-
-    // Update an existing user
-    @PutMapping("/update/{id}")
-    public ResponseEntity<User> updateUser(@PathVariable int id, @RequestBody User userDetails) {
-        User updatedUser = userService.updateUser(id, userDetails);
-        return ResponseEntity.ok(updatedUser);
-    }
-
-    // Delete a user by ID
-    @DeleteMapping("/delete/{id}")
-    public ResponseEntity<Void> deleteUser(@PathVariable int id) {
-        userService.deleteUser(id);
-        return ResponseEntity.noContent().build();
-    }
-
-    // Assign a role to a user
-    @PutMapping("/assignRole/{id}")
-    public ResponseEntity<User> assignRole(@PathVariable int id, Role role) {
-        User updatedUser = userService.assignRole(id,  role);
-        return ResponseEntity.ok(updatedUser);
-    }
-
-    // Login a user
-    @PostMapping("/login")
-    public ResponseEntity<User> login(@RequestBody User user) {
-        User loggedInUser = userService.login(user.getUsername(), user.getPassword());
-        return ResponseEntity.ok(loggedInUser);
-    }
-
-    // Get all users
     @GetMapping("/all")
     public ResponseEntity<List<User>> getAllUsers() {
         List<User> users = userService.getAllUsers();
         return ResponseEntity.ok(users);
     }
 
-    // Identify a user's role
-    @GetMapping("/role/{id}")
-    public ResponseEntity<String> identifyUserRole(@PathVariable int id) {
-        String role = userService.identifyUserRole(id);
-        return ResponseEntity.ok(role);
+    @PostMapping("/register")
+    public User registerUser(@RequestBody User user) {
+        User registeredUser = userService.registerUser(user);
+        return registeredUser;
     }
+
+    @PostMapping("/login")
+    public Role loginUser(@RequestBody Map<String, String> user) {
+        String username = user.get("username");
+        String password = user.get("password");
+        boolean isAuthenticated = userService.authenticateUser(username, password);
+        if (isAuthenticated) {
+            return userService.getUserRole(user.get("username"));
+        } else {
+            return  null;
+        }
+    }
+
+    @PostMapping("/getRole")
+    public Role getUserRole(@RequestBody Map<String, String> user) {
+        return userService.getUserRole(user.get("username"));
+    }
+
 }
