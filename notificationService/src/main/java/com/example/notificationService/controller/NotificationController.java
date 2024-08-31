@@ -45,7 +45,6 @@ public class NotificationController {
     }
 
 
-
     @GetMapping("/all")
     public List<Notification> getAllNotifications( Integer uid) {
         return notificationService.getAllNotifications();
