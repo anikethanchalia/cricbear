@@ -17,7 +17,7 @@ public class GatewayConfig {
                 .route(r -> r.path("/notifications/**")
                         .uri("http://localhost:8081/notifications"))
                 .route(r -> r.path("/tournament/**")
-                        .uri("http://localhost:8084/notifications"))
+                        .uri("http://localhost:8084/tournament"))
                 .build();
     }
 }
