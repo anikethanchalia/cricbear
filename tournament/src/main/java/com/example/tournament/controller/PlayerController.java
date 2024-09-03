@@ -10,6 +10,7 @@ import java.util.List;
 
 @RestController
 @RequestMapping("/player")
+@CrossOrigin(origins = "http://localhost:3000")
 public class PlayerController {
 
     @Autowired

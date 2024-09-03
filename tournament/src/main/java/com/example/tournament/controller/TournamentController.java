@@ -11,6 +11,7 @@ import java.util.Map;
 
 @RestController
 @RequestMapping("/tournament")
+@CrossOrigin(origins = "http://localhost:3000")
 public class TournamentController {
 
     @Autowired
