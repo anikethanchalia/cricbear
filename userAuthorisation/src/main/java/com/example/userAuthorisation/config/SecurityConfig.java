@@ -14,11 +14,13 @@ import org.springframework.security.crypto.factory.PasswordEncoderFactories;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.provisioning.InMemoryUserDetailsManager;
 import org.springframework.security.web.SecurityFilterChain;
+import org.springframework.web.servlet.config.annotation.CorsRegistry;
+import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 
 @Configuration
 @EnableWebSecurity
 @EnableMethodSecurity(prePostEnabled = true)
-public class SecurityConfig {
+public class SecurityConfig implements WebMvcConfigurer {
 
     @Bean
     SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
@@ -33,6 +35,15 @@ public class SecurityConfig {
     public UserDetailsService userDetailsService() {
         UserDetails user = User.withUsername("admin").password(passwordEncoder().encode("admin")).roles("ADMIN").disabled(false).build();
         return new InMemoryUserDetailsManager(user);
+    }
+
+    @Override
+    public void addCorsMappings(CorsRegistry registry) {
+        registry.addMapping("/**")
+                .allowedOrigins("http://localhost:3000")  // Replace with your allowed origins
+                .allowedMethods("GET", "POST", "PUT", "DELETE")  // Specify allowed HTTP methods
+                .allowedHeaders("*")  // Allows all headers
+                .allowCredentials(true);  // Allow credentials (cookies, authorization headers)
     }
 
     @Bean

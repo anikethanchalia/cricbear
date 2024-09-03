@@ -6,6 +6,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.sql.Date;
+import java.time.LocalDate;
 import java.util.List;
 
 @RestController
@@ -16,11 +18,8 @@ public class NotificationController {
     private NotificationService notificationService;
 
     @PostMapping("/send")
-    public Notification sendNotification(@RequestParam Integer uid,
-                                         @RequestParam String reminderType,
-                                         @RequestParam String message) {
-
-        return notificationService.sendNotification(uid, reminderType, message );
+    public List<Notification> sendNotification(){
+        return notificationService.findWithCurrentDate(Date.valueOf(LocalDate.now()));
     }
 
     @PostMapping("/add")

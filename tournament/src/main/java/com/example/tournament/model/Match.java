@@ -18,20 +18,4 @@ public class Match {
     @Column(name = "tid")
     private int tid;
 
-    @Column(name = "tName")
-    private String tName;
-
-    @Column(name = "startDate")
-    private Date startDate;
-
-    @Column(name = "endDate")
-    private Date endDate;
-
-    @Column(name = "status")
-    @Enumerated(EnumType.STRING)
-    private Status status;
-
-    @Column(name = "uid")
-    private int uid;
-
 }
