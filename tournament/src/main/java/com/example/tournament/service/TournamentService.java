@@ -16,7 +16,7 @@ public class TournamentService {
 
 
     public Tournament create(Tournament tournament) {
-        if (tournamentRepository.findBytName(tournament.getTName()) != null)
+        if (tournamentRepository.findBytName(tournament.getTName()) == null)
             return tournamentRepository.save(tournament);
         return null;
     }

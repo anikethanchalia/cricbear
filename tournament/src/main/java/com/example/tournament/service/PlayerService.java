@@ -25,7 +25,7 @@ public class PlayerService {
     }
 
 
-    public Player getById(Integer id) {
+    public List<Player> getById(Integer id) {
         return playerRepository.findByTeamid(id);
     }
 

@@ -18,9 +18,6 @@ public class Team {
     @Column(name = "teamid")
     private int teamId;
 
-    @Column(name = "tid")
-    private int tid;
-
     @Column(name = "team_name")
     private String teamName;
 
@@ -48,8 +45,7 @@ public class Team {
     @Column(name = "nrr")
     private double nrr;
 
-    public Team(int tid, String teamName, int coachId, long matchesPlayed,long matchesWon, long matchesLost, long matchesDrawn, long matchesAbandoned, double nrr ) {
-        this.teamId = tid;
+    public Team(String teamName, int coachId, long matchesPlayed,long matchesWon, long matchesLost, long matchesDrawn, long matchesAbandoned, double nrr ) {
         this.teamName = teamName;
         this.coachId = coachId;
         this.matchesPlayed = matchesPlayed;

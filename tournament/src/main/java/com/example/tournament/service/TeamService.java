@@ -15,7 +15,7 @@ public class TeamService {
     private TeamRepository teamRepository;
 
     public Team create(Team team) {
-        if (teamRepository.findByTeamName(team.getTeamName()) != null)
+        if (teamRepository.findByTeamName(team.getTeamName()) == null)
             return teamRepository.save(team);
         return null;
     }
