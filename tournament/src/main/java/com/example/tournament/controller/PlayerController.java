@@ -1,7 +1,6 @@
 package com.example.tournament.controller;
 
 import com.example.tournament.model.Player;
-import com.example.tournament.model.Team;
 import com.example.tournament.service.PlayerService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
@@ -10,7 +9,7 @@ import java.util.List;
 
 @RestController
 @RequestMapping("/player")
-@CrossOrigin(origins = "http://localhost:3000")
+@CrossOrigin(origins = {"http://localhost:3000","http://localhost:3001"})
 public class PlayerController {
 
     @Autowired
@@ -34,6 +33,11 @@ public class PlayerController {
     @GetMapping("/getAll")
     public List<Player> getAll() {
         return playerService.getAll();
+    }
+
+    @GetMapping("/count/{id}")
+    public int count(@PathVariable int id) {
+        return playerService.countByTeamid(id);
     }
 
     @DeleteMapping("/delete/{first_name}")

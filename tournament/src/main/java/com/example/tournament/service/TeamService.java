@@ -20,6 +20,10 @@ public class TeamService {
         return null;
     }
 
+    public Team getById(int id) {
+        return teamRepository.findById(id).orElse(null);
+    }
+
     public List<Team> getAll() {
         return teamRepository.findAll();
     }

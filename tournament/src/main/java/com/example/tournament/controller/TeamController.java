@@ -9,7 +9,7 @@ import java.util.List;
 
 @RestController
 @RequestMapping("/team")
-@CrossOrigin(origins = "http://localhost:3000")
+@CrossOrigin(origins = {"http://localhost:3000","http://localhost:3001"})
 public class TeamController {
     @Autowired
     private TeamService teamService;
@@ -32,6 +32,11 @@ public class TeamController {
     @GetMapping("/getAll")
     public List<Team> getAll() {
         return teamService.getAll();
+    }
+
+    @GetMapping("/getByID/{id}")
+    public Team getByID(@PathVariable int id) {
+        return teamService.getById(id);
     }
 
     @DeleteMapping("/delete/{id}")

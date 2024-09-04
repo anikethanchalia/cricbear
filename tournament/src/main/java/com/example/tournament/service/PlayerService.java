@@ -15,7 +15,7 @@ public class PlayerService {
     private PlayerRepository playerRepository;
 
     public Player create(Player player) {
-        if (playerRepository.findByFirstName(player.getFirstName()) != null)
+        if (playerRepository.findByFirstName(player.getFirstName()) == null)
             return playerRepository.save(player);
         return null;
     }
@@ -29,6 +29,9 @@ public class PlayerService {
         return playerRepository.findByTeamid(id);
     }
 
+    public int countByTeamid(int teamid){
+        return playerRepository.countByTeamid(teamid);
+    }
 
     public Player update(int playerId, Player updatedPlayer) {
         // Retrieve the existing player by ID
