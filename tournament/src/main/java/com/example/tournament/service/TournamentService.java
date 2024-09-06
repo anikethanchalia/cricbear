@@ -51,7 +51,7 @@ public class TournamentService {
     }
 
     
-    public void delete(Integer id) {
+    public boolean delete(Integer id) {
         tournamentRepository.deleteById(id);
     }
 
