@@ -42,4 +42,10 @@ public class UserService {
         }
         return null;
     }
+
+    public String setUserRole(String username, Role role) {
+        User user = userRepository.findByUsername(username);
+        user.setRole(role);
+        return "Role set";
+    }
 }

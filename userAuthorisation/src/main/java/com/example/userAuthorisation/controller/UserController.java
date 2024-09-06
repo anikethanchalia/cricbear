@@ -48,4 +48,9 @@ public class UserController {
         return userService.getUserRole(user.get("username"));
     }
 
+    @GetMapping("/setUserRole/{username}/{role}")
+    public String setUserRole(@PathVariable String username, @PathVariable Role role) {
+        return userService.setUserRole(username,role);
+    }
+
 }
