@@ -9,10 +9,9 @@ import java.util.List;
 
 @Repository
 public interface PlayerRepository extends JpaRepository<Player, Integer> {
-    public Player findByFirstName(String firstName);
-    public List<Player> findByTeamid(int teamid);
+    public Player findByName(String name);
+
     public Player findByPid(int pid);
-    void deleteByFirstName(String firstName);
-    @Query("SELECT COUNT(*) from Player where teamid = :teamid")
-    public int countByTeamid(int teamid);
+    void deleteByName(String name);
+
 }

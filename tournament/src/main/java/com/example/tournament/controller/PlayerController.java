@@ -25,23 +25,14 @@ public class PlayerController {
         return playerService.update(player.getPid(), player);
     }
 
-    @GetMapping("/getByName/{id}")
-    public List<Player> getByTeamName(@PathVariable Integer id) {
-        return playerService.getById(id);
-    }
 
     @GetMapping("/getAll")
     public List<Player> getAll() {
         return playerService.getAll();
     }
 
-    @GetMapping("/count/{id}")
-    public int count(@PathVariable int id) {
-        return playerService.countByTeamid(id);
-    }
-
-    @DeleteMapping("/delete/{first_name}")
-    public String delete(@PathVariable String first_name) {
-        return playerService.delete(first_name);
+    @DeleteMapping("/delete/{name}")
+    public String delete(@PathVariable String name) {
+        return playerService.delete(name);
     }
 }

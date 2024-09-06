@@ -4,28 +4,29 @@ import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import jakarta.persistence.*;
+import lombok.AllArgsConstructor;
+import lombok.Data;
+import lombok.NoArgsConstructor;
 
 import java.sql.Date;
+import java.util.List;
 
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
 @Entity
-@Table(name = "player")
+@Table(name = "player_profile")
 public class Player {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "pid")
     private int pid;
 
-    @Column(name = "teamid")
-    private int teamid;
 
-    @Column(name = "first_name")
-    private String firstName;
+    @Column(name = "name")
+    private String name;
 
-    @Column(name = "last_name")
-    private String lastName;
 
     @Column(name = "overseas")
     private boolean overseas;
@@ -35,19 +36,13 @@ public class Player {
     @Enumerated(EnumType.STRING)
     private PlayerRole playerRole;
 
-    @Column(name = "runs_scored")
-    private int runsScored;
 
-    @Column(name = "balls")
-    private int balls;
+    // Constructor with all fields except ID
+    public Player(String name, boolean overseas, PlayerRole playerRole) {
+        this.name = name;
+        this.overseas = overseas;
+        this.playerRole = playerRole;
+    }
 
-    @Column(name = "wickets")
-    private int wickets;
-
-    @Column(name = "overs")
-    private double overs;
-
-    @Column(name = "runs_given")
-    private int runsGiven;
 
 }
