@@ -30,4 +30,26 @@ public class RegTeamService {
     public ArrayList<RegTeam> findByGroupNumber(int groupNumber, int tid) {
         return regTeamRepository.findByGroupNumber(groupNumber,tid);
     }
+
+    public RegTeam findById(int id) {
+        return regTeamRepository.findById(id).orElse(null);
+    }
+
+    public RegTeam updateRegTeam(RegTeam regTeam) {
+        return regTeamRepository.save(regTeam);
+    }
+    public void deleteRegTeam(int id) {
+        regTeamRepository.deleteById(id);
+    }
+    public String regTeam(int tid, int teamid){
+        int count = regTeamRepository.countByTid(tid);
+        if(count < 6) {
+            RegTeam regTeam = new RegTeam(tid,teamid);
+            regTeamRepository.save(regTeam);
+            return "Registered Successfully";
+        }
+        else {
+            return "Tournament limit reached!";
+        }
+    }
 }

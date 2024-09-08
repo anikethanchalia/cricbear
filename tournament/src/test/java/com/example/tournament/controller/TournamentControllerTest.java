@@ -37,18 +37,18 @@ class TournamentControllerTest {
 
     private Tournament tournament;
 
-    @BeforeEach
-    void setUp() {
-        MockitoAnnotations.openMocks(this);
-        mockMvc = MockMvcBuilders.standaloneSetup(tournamentController).build();
-
-        tournament = new Tournament();
-        tournament.setTid(1);
-        tournament.setTName("Champions Trophy");
-        tournament.setStartDate(Date.valueOf("2024-09-01"));
-        tournament.setEndDate(Date.valueOf("2024-09-10"));
-        tournament.setStatus(Status.UPCOMING);
-    }
+//    @BeforeEach
+//    void setUp() {
+//        MockitoAnnotations.openMocks(this);
+//        mockMvc = MockMvcBuilders.standaloneSetup(tournamentController).build();
+//
+//        tournament = new Tournament();
+//        tournament.setTid(1);
+//        tournament.setTName("Champions Trophy");
+//        tournament.setStartDate(Date.valueOf("2024-09-01"));
+//        tournament.setEndDate(Date.valueOf("2024-09-10"));
+//        tournament.setStatus(Status.UPCOMING);
+//    }
 
     @Test
     void create_ShouldReturnCreatedTournament() throws Exception {

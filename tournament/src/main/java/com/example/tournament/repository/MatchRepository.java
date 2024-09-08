@@ -15,6 +15,7 @@ import java.util.List;
 public interface MatchRepository extends JpaRepository<Match, Integer> {
     public List<Match> findAllByTid(int tournamentId);
     public List<Match> findByMatchType(MatchType matchType);
+//    Match findByMid(int matchId);
 //    @Query("SELECT m.groupNumber, t.teamId,t.teamName, t.points, t.nrr FROM Match m JOIN RegTeam rt ON :teamId = rt.teamid JOIN Team t ON rt.teamid = t.teamId WHERE m.tid = :tid GROUP BY m.groupNumber ORDER BY t.points DESC")
 //    public List<Object[]> getMatchesByTeamId(int tid,int teamid);
 //    @Query("SELECT m.mid, m.teamId1, m.teamId2, m.groupNumber, t.points, t.nrr FROM Match m JOIN RegTeam rt ON m.tid = rt.tid JOIN Team t ON rt.teamid = t.teamId WHERE m.tid = :tid GROUP BY m.mid, m.teamId1, m.teamId2, m.groupNumber, t.points, t.nrr ORDER BY t.points DESC")
@@ -25,4 +26,6 @@ public interface MatchRepository extends JpaRepository<Match, Integer> {
 
     @Query("select t.teamId, rt.groupNumber, t.points,t.nrr from RegTeam rt join Team t on rt.teamid = t.teamId where rt.tid =:tid and rt.groupNumber = :groupNumber order by t.points desc")
     public List<Object[]> getSemiFinal(int tid, int groupNumber);
+
+    Match getByMid(Integer mid);
 }

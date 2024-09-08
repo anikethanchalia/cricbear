@@ -6,6 +6,8 @@ import com.example.tournament.repository.TournamentRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.time.temporal.ChronoUnit;
 import java.time.temporal.Temporal;
 import java.util.List;
@@ -51,11 +53,29 @@ public class TournamentService {
     }
 
     
-    public boolean delete(Integer id) {
+    public void delete(Integer id) {
         tournamentRepository.deleteById(id);
     }
 
     public List<Tournament> getByStatus(String status) {
         return tournamentRepository.findAllByStatus(Status.valueOf(status));
+    }
+
+    public boolean start(int tid, int uid){
+        Tournament tournament = tournamentRepository.findByTid(tid);
+        LocalDateTime now = LocalDateTime.now();
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd");
+        String formattedDateTime = now.format(formatter);
+        System.out.println(formattedDateTime);
+        System.out.println(tournament.getStartDate().format(formatter));
+        System.out.println(tournament.getStartDate().format(formatter).equals(formattedDateTime));
+        if(tournament.getUid() == uid && tournament.getStartDate().format(formatter).equals(formattedDateTime)){
+            tournament.setStatus(Status.LIVE);
+            tournament = update(tournament);
+            return true;
+        }
+        else {
+            return false;
+        }
     }
 }

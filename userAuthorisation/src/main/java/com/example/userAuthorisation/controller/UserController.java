@@ -39,7 +39,7 @@ public class UserController {
         if (registeredUser != null) {
             return new ResponseEntity<>(registeredUser, HttpStatus.CREATED);
         } else {
-            return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
+            return new ResponseEntity<>(null,HttpStatus.INTERNAL_SERVER_ERROR);
         }
     }
 
@@ -57,7 +57,7 @@ public class UserController {
                 return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
             }
         } else {
-            return new ResponseEntity<>(HttpStatus.UNAUTHORIZED);
+            return new ResponseEntity<>(null,HttpStatus.UNAUTHORIZED);
         }
     }
 
@@ -69,7 +69,7 @@ public class UserController {
         if (role != null) {
             return ResponseEntity.ok(role);
         } else {
-            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+            return new ResponseEntity<>(null,HttpStatus.NOT_FOUND);
         }
     }
 

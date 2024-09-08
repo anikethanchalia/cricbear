@@ -6,6 +6,7 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 import java.sql.Date;
+import java.time.LocalDateTime;
 
 @Data
 @AllArgsConstructor
@@ -23,10 +24,10 @@ public class Tournament {
     private String tName;
 
     @Column(name = "startDate")
-    private Date startDate;
+    private LocalDateTime startDate;
 
     @Column(name = "endDate")
-    private Date endDate;
+    private LocalDateTime endDate;
 
     @Column(name = "status")
     @Enumerated(EnumType.STRING)
@@ -35,7 +36,7 @@ public class Tournament {
     @Column(name = "uid")
     private int uid;
 
-    public Tournament(String tName, Date startDate, Date endDate, Status status) {
+    public Tournament(String tName, LocalDateTime startDate, LocalDateTime endDate, Status status) {
         this.tName = tName;
         this.startDate = startDate;
         this.endDate = endDate;

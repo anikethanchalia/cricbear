@@ -7,7 +7,6 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 
@@ -47,16 +46,27 @@ class UserControllerTest {
     }
 
     @Test
+    void testGetAllUsers_NoContent() {
+        when(userService.getAllUsers()).thenReturn(Collections.emptyList());
+
+        ResponseEntity<List<User>> response = userController.getAllUsers();
+
+        assertEquals(HttpStatus.NO_CONTENT, response.getStatusCode());
+        assertTrue(response.getBody().isEmpty());
+    }
+
+    @Test
     void testRegisterUser_Success() {
         User user = new User();
         user.setUsername("testuser");
 
         when(userService.registerUser(user)).thenReturn(user);
 
-        User registeredUser = userController.registerUser(user);
+        ResponseEntity<User> response = userController.registerUser(user);
 
-        assertNotNull(registeredUser);
-        assertEquals("testuser", registeredUser.getUsername());
+        assertEquals(HttpStatus.CREATED, response.getStatusCode());
+        assertNotNull(response.getBody());
+        assertEquals("testuser", response.getBody().getUsername());
         verify(userService, times(1)).registerUser(user);
     }
 
@@ -67,9 +77,10 @@ class UserControllerTest {
 
         when(userService.registerUser(user)).thenReturn(null);
 
-        User registeredUser = userController.registerUser(user);
+        ResponseEntity<User> response = userController.registerUser(user);
 
-        assertNull(registeredUser);
+        assertEquals(HttpStatus.INTERNAL_SERVER_ERROR, response.getStatusCode());
+        assertNull(response.getBody());
         verify(userService, times(1)).registerUser(user);
     }
 
@@ -84,10 +95,11 @@ class UserControllerTest {
         when(userService.authenticateUser("testuser", "testpassword")).thenReturn(true);
         when(userService.getUserRole("testuser")).thenReturn(role);
 
-        Role returnedRole = userController.loginUser(loginData);
+        ResponseEntity<Role> response = userController.loginUser(loginData);
 
-        assertNotNull(returnedRole);
-        assertEquals(Role.ADMIN, returnedRole);
+        assertEquals(HttpStatus.OK, response.getStatusCode());
+        assertNotNull(response.getBody());
+        assertEquals(Role.ADMIN, response.getBody());
     }
 
     @Test
@@ -98,9 +110,10 @@ class UserControllerTest {
 
         when(userService.authenticateUser("testuser", "wrongpassword")).thenReturn(false);
 
-        Role returnedRole = userController.loginUser(loginData);
+        ResponseEntity<Role> response = userController.loginUser(loginData);
 
-        assertNull(returnedRole);
+        assertEquals(HttpStatus.UNAUTHORIZED, response.getStatusCode());
+        assertNull(response.getBody());
         verify(userService, never()).getUserRole("testuser");
     }
 
@@ -113,10 +126,11 @@ class UserControllerTest {
 
         when(userService.getUserRole("testuser")).thenReturn(role);
 
-        Role returnedRole = userController.getUserRole(requestData);
+        ResponseEntity<Role> response = userController.getUserRole(requestData);
 
-        assertNotNull(returnedRole);
-        assertEquals(Role.ADMIN, returnedRole);
+        assertEquals(HttpStatus.OK, response.getStatusCode());
+        assertNotNull(response.getBody());
+        assertEquals(Role.ADMIN, response.getBody());
     }
 
     @Test
@@ -126,8 +140,9 @@ class UserControllerTest {
 
         when(userService.getUserRole("nonexistinguser")).thenReturn(null);
 
-        Role returnedRole = userController.getUserRole(requestData);
+        ResponseEntity<Role> response = userController.getUserRole(requestData);
 
-        assertNull(returnedRole);
+        assertEquals(HttpStatus.NOT_FOUND, response.getStatusCode());
+        assertNull(response.getBody());
     }
 }

@@ -26,4 +26,9 @@ public class RegTeam {
 
     @Column(name = "group_number")
     private int groupNumber;
+
+    public RegTeam(int tid, int teamid) {
+        this.tid = tid;
+        this.teamid = teamid;
+    }
 }

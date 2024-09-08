@@ -1,22 +1,27 @@
 package com.example.tournament.controller;
 
+import com.example.tournament.model.Match;
 import com.example.tournament.model.Tournament;
+import com.example.tournament.service.MatchService;
 import com.example.tournament.service.TournamentService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
 @RestController
 @RequestMapping("/tournament")
-@CrossOrigin(origins = {"http://localhost:3000", "http://localhost:3001"})
+@CrossOrigin(origins = {"http://localhost:3000", "http://localhost:3001", "*"})
 public class TournamentController {
 
     @Autowired
     private TournamentService tournamentService;
+    @Autowired
+    private MatchService matchService;
 
     @PostMapping("/create")
     public ResponseEntity<Tournament> create(@RequestBody Tournament tournament) {
@@ -64,5 +69,15 @@ public class TournamentController {
         } else {
             return new ResponseEntity<>(tournaments, HttpStatus.OK);
         }
+    }
+
+    @PostMapping("/start")
+    public ResponseEntity<ArrayList<Match>> start(@RequestBody Map<String, Integer> tournament) {
+        boolean success = tournamentService.start(tournament.get("tid"), tournament.get("uid"));
+        if (success) {
+            return new ResponseEntity<>(matchService.scheduleMatches(tournament.get("tid")), HttpStatus.OK);
+        }
+        else
+            return new ResponseEntity<>(null,HttpStatus.NOT_FOUND);
     }
 }

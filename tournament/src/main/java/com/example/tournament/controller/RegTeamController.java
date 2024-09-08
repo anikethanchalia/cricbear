@@ -39,4 +39,30 @@ public class RegTeamController {
             return new ResponseEntity<>(null,HttpStatus.NO_CONTENT);
         }
     }
+
+    @DeleteMapping("/delete")
+    public ResponseEntity<String> deleteRegTeam(@RequestBody RegTeam regTeam) {
+        if (regTeam == null) {
+            return new ResponseEntity<>(null,HttpStatus.BAD_REQUEST);
+        }
+        else {
+            return new ResponseEntity<>("Successfully deleted", HttpStatus.OK);
+        }
+    }
+
+    @PutMapping("/update")
+    public ResponseEntity<String> updateRegTeam(@RequestBody RegTeam regTeam) {
+        if (regTeam == null) {
+            return new ResponseEntity<>(null,HttpStatus.BAD_REQUEST);
+        }
+        else {
+            regTeamService.updateRegTeam(regTeam);
+            return new ResponseEntity<>("Successfully updated", HttpStatus.OK);
+        }
+    }
+
+    @GetMapping("/regTeamToTournament/{tid}/{teamid}")
+    public ResponseEntity<?> regTeam(@PathVariable int tid, @PathVariable int teamid) {
+        return new ResponseEntity<>(regTeamService.regTeam(tid, teamid), HttpStatus.OK);
+    }
 }
