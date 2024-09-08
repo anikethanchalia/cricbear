@@ -29,4 +29,11 @@ public class MatchResult {
 
     @Column(name = "winner_id")
     private int winnerId;
+
+    public MatchResult(int mid, TossDecision tossDecision, int tossWinTeam, int teamId) {
+        this.mid = mid;
+        this.tossDesicion = tossDecision;
+        this.tossWinTeam = tossWinTeam;
+        this.winnerId = teamId;
+    }
 }

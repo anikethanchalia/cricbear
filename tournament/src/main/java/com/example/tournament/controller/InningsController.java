@@ -14,6 +14,6 @@ public class InningsController {
 
     @GetMapping("/{mid}")
     public void tossDecision(@PathVariable int mid) throws InterruptedException {
-        inningsService.tossDecision(mid);
+        inningsService.startMatch(mid);
     }
 }

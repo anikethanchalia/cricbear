@@ -29,6 +29,8 @@ public class InningsService {
     public static List<String> bowler1;
     public static List<String> playing11Team2 = new ArrayList<>();
     public static List<String> bowler2;
+    public static List<String> batsmen1;
+    public static List<String> batsmen2;
     public static int MID;
     private static final Random RANDOM = new Random();
 
@@ -43,6 +45,15 @@ public class InningsService {
     private PlayerTeamRepository playerTeamRepository;
     @Autowired
     private BallByBallService ballByBallService;
+
+    public static void setToNew() {
+        playing11Team1 = new ArrayList<>();
+        bowler1 = new ArrayList<>();
+        playing11Team2 = new ArrayList<>();
+        bowler2 = new ArrayList<>();
+        batsmen1 = new ArrayList<>();
+        batsmen2 = new ArrayList<>();
+    }
 
     public Innings create(Innings innings) {
         return inningsRepository.save(innings);
@@ -70,7 +81,7 @@ public class InningsService {
         return enumValues.get(randomIndex);
     }
 
-    public void tossDecision(Integer mid) throws InterruptedException {
+    public void startMatch(Integer mid) throws InterruptedException {
         MID = mid;
         Match match = matchRepository.getByMid(mid);
         TossDecision decision = getRandomEnum(TossDecision.class);
@@ -91,7 +102,7 @@ public class InningsService {
         Innings innings = new Innings(mid, BATTING_ID,BOWLING_ID);
         inningsRepository.save(innings);
         System.out.println(tossDecision+" "+BATTING_ID+" "+BOWLING_ID);
-        List<String> batsmen1 = playerTeamRepository.findByRoleAndTeam(BATTING_ID, String.valueOf(PlayerRole.BATSMAN),2,true);
+        batsmen1 = playerTeamRepository.findByRoleAndTeam(BATTING_ID, String.valueOf(PlayerRole.BATSMAN),2,true);
         batsmen1.addAll(playerTeamRepository.findByRoleAndTeam(BATTING_ID, String.valueOf(PlayerRole.BATSMAN),2,true));
         List<String> allrounder1 = playerTeamRepository.findByRoleAndTeam(BATTING_ID, String.valueOf(PlayerRole.ALLROUNDER),1,false);
         List<String> wk1 = playerTeamRepository.findByRoleAndTeam(BATTING_ID, String.valueOf(PlayerRole.WICKETKEEPER),1,false);
@@ -103,7 +114,7 @@ public class InningsService {
         playing11Team1.addAll(bowler1);
         bowler1.addAll(allrounder1);
         System.out.println(playing11Team1);
-        List<String> batsmen2 = playerTeamRepository.findByRoleAndTeam(BOWLING_ID, String.valueOf(PlayerRole.BATSMAN),2,false);
+        batsmen2 = playerTeamRepository.findByRoleAndTeam(BOWLING_ID, String.valueOf(PlayerRole.BATSMAN),2,false);
         batsmen2.addAll(playerTeamRepository.findByRoleAndTeam(BOWLING_ID, String.valueOf(PlayerRole.BATSMAN),2,true));
         List<String> allrounder2 = playerTeamRepository.findByRoleAndTeam(BOWLING_ID, String.valueOf(PlayerRole.ALLROUNDER),1,false);
         List<String> wk2 = playerTeamRepository.findByRoleAndTeam(BOWLING_ID, String.valueOf(PlayerRole.WICKETKEEPER),1,false);
@@ -122,6 +133,12 @@ public class InningsService {
         Innings inn = inningsRepository.getByMid(mid);
         BallByBallService.iid= inn.getIid();
         BallByBallService.bowler= bowler2;
+        runs=0;
+        BallByBallService.overs = 0;
+        BallByBallService.wickets = 0;
+        ballNumber = 0;
+        isNoBall = false;
+        target=Integer.MAX_VALUE;
         batter = 0;
         batsman1Id = playing11.get(batter);
         batter++;

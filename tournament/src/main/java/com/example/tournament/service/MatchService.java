@@ -9,6 +9,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.lang.reflect.Array;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -23,6 +25,9 @@ public class MatchService {
 
     @Autowired
     private TournamentService tournamentService;
+
+    @Autowired
+    InningsService inningsService;
 
     public List<Match> findAll() {
         return matchRepository.findAll();
@@ -48,6 +53,23 @@ public class MatchService {
         return matchRepository.findByMatchType(matchType);
     }
 
+    public Match update(Match match) {
+        return matchRepository.save(match);
+    }
+
+    public String startMatch(int mid) throws InterruptedException {
+        Match match = matchRepository.getByMid(mid);
+        if(match != null && match.getStatus().equals(MatchStatus.UPCOMING)) {
+            LocalDateTime now = LocalDateTime.now();
+            DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd");
+            String formattedDateTime = now.format(formatter);
+            if (formattedDateTime.equals(formatter.format(match.getMatchDate()))){
+                inningsService.startMatch(mid);
+                return "Match started";
+            }
+        }
+        return null;
+    }
     public ArrayList<Match> scheduleMatches(Integer tid) {
         Tournament t = tournamentService.getByTid(tid);
         ArrayList<Match> matches = new ArrayList<>();
@@ -65,8 +87,8 @@ public class MatchService {
                 Match match2 = new Match(group2.get(j).getTeamid(),group2.get(i).getTeamid(),t.getStartDate().toLocalDate().plusDays(daysToAdd).atTime(18,00),MatchStatus.UPCOMING,"Chinnaswamy",tid,MatchType.NORMAL);
                 matches.add(match2);
                 daysToAdd++;
-//                matchRepository.save(match);
-//                matchRepository.save(match2);
+                matchRepository.save(match);
+                matchRepository.save(match2);
                 System.out.println(match);
                 System.out.println(match2);
             }

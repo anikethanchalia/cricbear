@@ -1,19 +1,13 @@
 package com.example.tournament.service;
 
-import com.example.tournament.model.BallByBall;
-import com.example.tournament.model.Extra;
-import com.example.tournament.model.Innings;
-import com.example.tournament.model.Wicket;
+import com.example.tournament.model.*;
 import com.example.tournament.repository.BallByBallRepository;
 import com.example.tournament.repository.InningsRepository;
+import com.example.tournament.repository.TeamRepository;
 import lombok.AllArgsConstructor;
 import lombok.Data;
-import lombok.NoArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.scheduling.TaskScheduler;
 import org.springframework.scheduling.annotation.EnableScheduling;
-import org.springframework.scheduling.annotation.Scheduled;
-import org.springframework.scheduling.support.CronTrigger;
 import org.springframework.stereotype.Component;
 import org.springframework.stereotype.Service;
 
@@ -21,8 +15,6 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Random;
-import java.util.concurrent.ScheduledFuture;
-import java.util.concurrent.ScheduledThreadPoolExecutor;
 
 import static com.example.tournament.service.InningsService.*;
 
@@ -42,7 +34,7 @@ public class BallByBallService {
     private Thread taskThread;
     private static ArrayList<Object> possibleOutcomes = new ArrayList<>(Arrays.asList(0,1,2,3,4,5,6,"W",Extra.WIDE,Extra.NOBALL));
     private static final Random RANDOM = new Random();
-    private static final long DELAY = 100;
+    private static final long DELAY = 2000;
     public static boolean enabled = false;
     public static boolean enabled2 = false;
     //    private BallByBall ballByBall;
@@ -63,8 +55,14 @@ public class BallByBallService {
 
     @Autowired
     private InningsRepository inningsRepository;
-
-
+    @Autowired
+    private MatchService matchService;
+    @Autowired
+    private TeamRepository teamRepository;
+    @Autowired
+    private TeamService teamService;
+    @Autowired
+    private MatchResultService matchResultService;
 
 
     public static void setStaticValues() {
@@ -91,9 +89,11 @@ public class BallByBallService {
     }
 
     public static void swap() {
+        System.out.println("Before swap: " + batsman1Id + " - " + batsman2Id);
         String temp = batsman1Id;
         batsman1Id = batsman2Id;
         batsman2Id = temp;
+        System.out.println("After swap: " + batsman1Id + " - " + batsman2Id);
     }
 
     public void calculateScore() throws InterruptedException {
@@ -106,23 +106,20 @@ public class BallByBallService {
             if (overs < 20 && wickets < 10) {
 
                 Object value = possibleOutcomes.get(RANDOM.nextInt(possibleOutcomes.size()));
-                if (value instanceof Integer) {
-                    Integer integer = (Integer) value;
-                    runs += (Integer) value;
-                    if (integer % 2 != 0) {
-                        swap();
+                if(value instanceof Extra) {
+                    if (Extra.valueOf(value.toString()).equals(Extra.NOBALL)) {
+                        isNoBall = true;
                     }
-                    isNoBall = false;
-                    ballNumber++;
-                    ballByBallRepository.save(new BallByBall(iid, overs, ballNumber, batsman1Id, batsman2Id, bowlerid, integer, null, null, runs, wickets));
-                    System.out.println(ballNumber + " " + runs + " " + wickets + " " + batter + " " + bowlerid + " " + batsman1Id + " " + batsman2Id);
-                } else if (value instanceof String) {
+                    runs++;
+                    ballByBallRepository.save(new BallByBall(iid, overs, ballNumber, batsman1Id, batsman2Id, bowlerid, null, Extra.valueOf(value.toString()), null, runs, wickets));
+                }
+                else if (value instanceof String) {
                     if ("W".equals(value)) {
                         if (!isNoBall) {
 
                             wickets++;
                             wicket = getRandomEnum(Wicket.class);
-
+                            ballNumber++;
                             ballByBallRepository.save(new BallByBall(iid, overs, ballNumber, batsman1Id, batsman2Id, bowlerid, null, null, wicket, runs, wickets));
                             if (wickets == 10) {
                                 return;
@@ -131,24 +128,33 @@ public class BallByBallService {
                                 batter++;
                             }
                         } else {
+                            ballNumber++;
                             ballByBallRepository.save(new BallByBall(iid, overs, ballNumber, batsman1Id, batsman2Id, bowlerid, null, null, wicket, runs, wickets));
                         }
                         isNoBall = false;
-                        ballNumber++;
                     }
                     System.out.println(ballNumber + " " + runs + " " + wickets + " " + batter + " " + bowlerid + " " + batsman1Id + " " + batsman2Id);
-                } else {
-                    if (Extra.valueOf(value.toString()).equals(Extra.NOBALL)) {
-                        isNoBall = true;
+                }
+                else if (value instanceof Integer) {
+                    Integer integer = (Integer) value;
+                    runs += (Integer) value;
+                    isNoBall = false;
+                    ballNumber++;
+                    ballByBallRepository.save(new BallByBall(iid, overs, ballNumber, batsman1Id, batsman2Id, bowlerid, integer, null, null, runs, wickets));
+                    System.out.println(ballNumber + " " + integer+" "+runs + " " + wickets + " " + batter + " " + bowlerid + " " + batsman1Id + " " + batsman2Id);
+                    if (integer % 2 != 0) {
+                        swap();
                     }
-                    runs++;
-                    ballByBallRepository.save(new BallByBall(iid, overs, ballNumber, batsman1Id, batsman2Id, bowlerid, null, Extra.valueOf(value.toString()), null, runs, wickets));
+                    System.out.println(batsman1Id + " " + batsman2Id + " " + wickets);
                 }
                 if (ballNumber % 6 == 0 && ballNumber != 0) {
                     if (ballByBallRepository.countByBowlerId(bowlerid,iid) >= 4) {
                         System.out.println("The Count of " + bowlerid + " is " + ballByBallRepository.countByBowlerId(bowlerid,iid));
                         bowlerid=null;
                         System.out.println(bowler);
+                    }
+                    if(bowler.size()<=2){
+                        bowler.addAll(batsmen2);
                     }
                     overs++;
                     ballNumber = 0;
@@ -159,6 +165,7 @@ public class BallByBallService {
                     bowlerid = temp;
                     bowler.remove(bowlerid);
                     swap();
+                    System.out.println(batsman1Id + " " + batsman2Id + " " + wickets);
                     System.out.println(bowler);
                 }
             } else {
@@ -225,24 +232,22 @@ public class BallByBallService {
             if (overs < 20 && wickets < 10 && target>=0) {
 
                 Object value = possibleOutcomes.get(RANDOM.nextInt(possibleOutcomes.size()));
-                if (value instanceof Integer) {
-                    Integer integer = (Integer) value;
-                    runs += (Integer) value;
-                    target-=(Integer) value;
-                    if (integer % 2 != 0) {
-                        swap();
+                if (value instanceof Extra) {
+                    if (Extra.valueOf(value.toString()).equals(Extra.NOBALL)) {
+                        isNoBall = true;
                     }
-                    isNoBall = false;
-                    ballNumber++;
-                    ballByBallRepository.save(new BallByBall(iid, overs, ballNumber, batsman1Id, batsman2Id, bowlerid, integer, null, null, runs, wickets));
-                    System.out.println(ballNumber + " " + runs + " " + wickets + " " + batter + " " + bowlerid + " " + batsman1Id + " " + batsman2Id);
-                } else if (value instanceof String) {
+                    runs++;
+                    target--;
+                    ballByBallRepository.save(new BallByBall(iid, overs, ballNumber, batsman1Id, batsman2Id, bowlerid, null, Extra.valueOf(value.toString()), null, runs, wickets));
+                }
+                else if (value instanceof String) {
                     if ("W".equals(value)) {
                         if (!isNoBall) {
 
                             wickets++;
                             wicket = getRandomEnum(Wicket.class);
                             System.out.println(ballNumber + " " + runs + " " + wickets + " " + batter + " " + bowlerid + " " + batsman1Id + " " + batsman2Id+bowler);
+                            ballNumber++;
                             ballByBallRepository.save(new BallByBall(iid, overs, ballNumber, batsman1Id, batsman2Id, bowlerid, null, null, wicket, runs, wickets));
                             if (wickets == 10) {
                                 return;
@@ -251,25 +256,35 @@ public class BallByBallService {
                                 batter++;
                             }
                         } else {
+                            ballNumber++;
                             ballByBallRepository.save(new BallByBall(iid, overs, ballNumber, batsman1Id, batsman2Id, bowlerid, null, null, wicket, runs, wickets));
                         }
                         isNoBall = false;
-                        ballNumber++;
                     }
                     System.out.println(ballNumber + " " + runs + " " + wickets + " " + batter + " " + bowlerid + " " + batsman1Id + " " + batsman2Id+bowler);
-                } else {
-                    if (Extra.valueOf(value.toString()).equals(Extra.NOBALL)) {
-                        isNoBall = true;
+                }
+                else if (value instanceof Integer) {
+                    Integer integer = (Integer) value;
+                    runs += (Integer) value;
+                    target-=(Integer) value;
+                    isNoBall = false;
+                    ballNumber++;
+                    ballByBallRepository.save(new BallByBall(iid, overs, ballNumber, batsman1Id, batsman2Id, bowlerid, integer, null, null, runs, wickets));
+                    System.out.println(ballNumber + " " + runs + " " + wickets + " " + batter + " " + bowlerid + " " + batsman1Id + " " + batsman2Id);
+                    System.out.println(batsman1Id + " " + batsman2Id + " " + wickets);
+                    if (integer % 2 != 0) {
+                        swap();
                     }
-                    runs++;
-                    target--;
-                    ballByBallRepository.save(new BallByBall(iid, overs, ballNumber, batsman1Id, batsman2Id, bowlerid, null, Extra.valueOf(value.toString()), null, runs, wickets));
+                    System.out.println(batsman1Id + " " + batsman2Id + " " + wickets);
                 }
                 if (ballNumber % 6 == 0 && ballNumber != 0) {
                     if (ballByBallRepository.countByBowlerId(bowlerid,iid) >= 4) {
                         System.out.println("The Count of " + bowlerid + " is " + ballByBallRepository.countByBowlerId(bowlerid,iid));
                         bowlerid=null;
                         System.out.println(bowler);
+                    }
+                    if(bowler.size()<=2){
+                        bowler.addAll(batsmen1);
                     }
                     overs++;
                     ballNumber = 0;
@@ -279,17 +294,56 @@ public class BallByBallService {
                         bowler.add(bowlerid);
                     bowlerid = temp;
                     bowler.remove(bowlerid);
-                    swap();
                     System.out.println(bowler);
+                    System.out.println(batsman1Id + " " + batsman2Id + " " + wickets);
+                    swap();
+                    System.out.println(batsman1Id + " " + batsman2Id + " " + wickets);
                 }
             } else {
                 System.out.println("In Else");
                 double overToSave = Double.parseDouble(overs+"."+ballNumber);
-                System.out.println(ballNumber + " " + overToSave);
+                System.out.println(ballNumber + " " + overToSave+" "+runs);
                 System.out.println(MID);
                 Innings innings = new Innings(iid,MID,BOWLING_ID,BATTING_ID, runs, wickets, overToSave);
                 System.out.println(innings);
                 inningsRepository.save(innings);
+                setToNew();
+                System.out.println(playing11Team2+" "+playing11Team1);
+                Match match = matchService.findById(MID);
+                match.setStatus(MatchStatus.COMPLETED);
+                matchService.update(match);
+                Team teamBattingSecond = teamService.getById(BOWLING_ID);
+                Team teamBattingFirst = teamService.getById(BATTING_ID);
+                if(target>0){
+                    double nrr =0;
+                    if (target>0 && target<=25)
+                        nrr = 0.1;
+                    else if(target>25 && target<=50)
+                        nrr = 0.2;
+                    else
+                        nrr = 0.3;
+                    matchResultService.createMatchResult(new MatchResult(MID,tossDecision,TOSS_WIN_TEAM,teamBattingFirst.getTeamId()));
+                    System.out.println(teamService.updateAfterResults(teamBattingFirst,1,1,0,0,0,2,nrr));
+                    System.out.println(teamService.updateAfterResults(teamBattingSecond,1,0,1,0,0,0,-nrr));
+                }
+                else if (target<0){
+                    double nrr =0;
+                    int winByWickets = 10 - wickets;
+                    if (winByWickets > 0 && winByWickets <= 3)
+                        nrr = 0.1;
+                    else if(winByWickets > 3 && winByWickets <= 6)
+                        nrr = 0.2;
+                    else
+                        nrr = 0.3;
+                    matchResultService.createMatchResult(new MatchResult(MID,tossDecision,TOSS_WIN_TEAM,teamBattingSecond.getTeamId()));
+                    System.out.println(teamService.updateAfterResults(teamBattingSecond,1,1,0,0,0,2,nrr));
+                    System.out.println(teamService.updateAfterResults(teamBattingFirst,1,0,1,0,0,0,-nrr));
+
+                }
+                else {
+                    System.out.println(teamService.updateAfterResults(teamBattingSecond,1,0,0,1,0,0,0));
+                    System.out.println(teamService.updateAfterResults(teamBattingFirst,1,0,0,1,0,0,0));
+                }
                 enabled2 = false;
             }
         }
@@ -309,6 +363,6 @@ public class BallByBallService {
                 }
             }
         }).start();
-        System.out.println("Here");
+//        System.out.println("Here");
     }
 }

@@ -1,8 +1,6 @@
 package com.example.tournament.service;
 
-import com.example.tournament.model.Status;
 import com.example.tournament.model.Team;
-import com.example.tournament.model.Tournament;
 import com.example.tournament.repository.TeamRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -52,4 +50,14 @@ public class TeamService {
         teamRepository.deleteById(id);
     }
 
+    public Team updateAfterResults(Team teamBatting, int matchesPlayed, int matchesWon, int matchesLost, int matcheDrawn, int matchesAbandoned, int points, double nrr) {
+        teamBatting.setMatchesPlayed(teamBatting.getMatchesPlayed() + matchesPlayed);
+        teamBatting.setMatchesWon(teamBatting.getMatchesWon() + matchesWon);
+        teamBatting.setMatchesLost(teamBatting.getMatchesLost() + matchesLost);
+        teamBatting.setMatchesDrawn(teamBatting.getMatchesDrawn()+matcheDrawn);
+        teamBatting.setMatchesAbandoned(teamBatting.getMatchesAbandoned()+matchesAbandoned);
+        teamBatting.setPoints(teamBatting.getPoints()+points);
+        teamBatting.setNrr(teamBatting.getNrr()+nrr);
+        return teamRepository.save(teamBatting);
+    }
 }
