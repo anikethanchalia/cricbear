@@ -5,7 +5,6 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
-import java.sql.Date;
 import java.time.LocalDateTime;
 
 @Data
@@ -20,13 +19,13 @@ public class Tournament {
     @Column(name = "tid")
     private int tid;
 
-    @Column(name = "tName")
-    private String tName;
+    @Column(name = "t_name")
+    private String tournamentName;
 
-    @Column(name = "startDate")
+    @Column(name = "start_date")
     private LocalDateTime startDate;
 
-    @Column(name = "endDate")
+    @Column(name = "end_date")
     private LocalDateTime endDate;
 
     @Column(name = "status")
@@ -36,8 +35,8 @@ public class Tournament {
     @Column(name = "uid")
     private int uid;
 
-    public Tournament(String tName, LocalDateTime startDate, LocalDateTime endDate, Status status) {
-        this.tName = tName;
+    public Tournament(String tournamentName, LocalDateTime startDate, LocalDateTime endDate, Status status) {
+        this.tournamentName = tournamentName;
         this.startDate = startDate;
         this.endDate = endDate;
         this.status = status;

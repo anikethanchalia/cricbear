@@ -37,8 +37,7 @@ public class InningsService {
 
     @Autowired
     private InningsRepository inningsRepository;
-    @Autowired
-    private MatchService matchService;
+
     @Autowired
     private MatchRepository matchRepository;
     @Autowired

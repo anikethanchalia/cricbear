@@ -24,14 +24,19 @@ public class TournamentController {
     private MatchService matchService;
 
     @PostMapping("/create")
-    public ResponseEntity<Tournament> create(@RequestBody Tournament tournament) {
+    public ResponseEntity<?> create(@RequestBody Tournament tournament) {
+        System.out.println(tournament);
+        if (tournament.getTournamentName() == null || tournament.getTournamentName().isEmpty()) {
+            return ResponseEntity.badRequest().body("Tournament name cannot be null or empty.");
+        }
+
         Tournament createdTournament = tournamentService.create(tournament);
-        return new ResponseEntity<>(createdTournament, HttpStatus.CREATED);
+        return ResponseEntity.ok(createdTournament);
     }
 
-    @PutMapping("/update")
-    public ResponseEntity<Tournament> update(@RequestBody Tournament tournament) {
-        Tournament updatedTournament = tournamentService.update(tournament);
+    @PutMapping("/update/{uid}")
+    public ResponseEntity<Tournament> update(@RequestBody Tournament tournament,@PathVariable int uid) {
+        Tournament updatedTournament = tournamentService.update(tournament,uid);
         if (updatedTournament != null) {
             return new ResponseEntity<>(updatedTournament, HttpStatus.OK);
         } else {
@@ -75,9 +80,18 @@ public class TournamentController {
     public ResponseEntity<ArrayList<Match>> start(@RequestBody Map<String, Integer> tournament) {
         boolean success = tournamentService.start(tournament.get("tid"), tournament.get("uid"));
         if (success) {
-            return new ResponseEntity<>(matchService.scheduleMatches(tournament.get("tid")), HttpStatus.OK);
+            return new ResponseEntity<>(matchService.scheduleMatches(tournament.get("tid"), tournament.get("uid")), HttpStatus.OK);
         }
         else
             return new ResponseEntity<>(null,HttpStatus.NOT_FOUND);
+    }
+
+    @GetMapping("/getByTid/{tid}")
+    public ResponseEntity<Tournament> getByTid(@PathVariable Integer tid) {
+        Tournament tournament = tournamentService.getByTid(tid);
+        if (tournament != null) {
+            return new ResponseEntity<>(tournament, HttpStatus.OK);
+        }
+        return new ResponseEntity<>(null,HttpStatus.NOT_FOUND);
     }
 }

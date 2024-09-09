@@ -8,11 +8,12 @@ import org.springframework.web.bind.annotation.*;
 
 import java.sql.Date;
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.List;
 
 @RestController
 @RequestMapping("/notifications")
-@CrossOrigin(origins = {"http://localhost:3000","http://localhost:3001"})
+@CrossOrigin(origins = {"http://localhost:3000", "http://localhost:3001", "*"})
 public class NotificationController {
 
     @Autowired
@@ -20,7 +21,7 @@ public class NotificationController {
 
     @PostMapping("/send")
     public List<Notification> sendNotification(){
-        return notificationService.findWithCurrentDate(Date.valueOf(LocalDate.now()));
+        return notificationService.findWithCurrentDate(LocalDateTime.now());
     }
 
     @PostMapping("/add")

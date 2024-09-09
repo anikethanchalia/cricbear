@@ -10,7 +10,7 @@ import java.util.List;
 @Repository
 public interface TournamentRepository extends JpaRepository<Tournament, Integer> {
     Tournament findByTid(int id);
-    Tournament findBytName(String name);
+    Tournament findByTournamentName(String name);
     Tournament findByUid(int id);
     List<Tournament> findAllByStatus(Status status);
 }

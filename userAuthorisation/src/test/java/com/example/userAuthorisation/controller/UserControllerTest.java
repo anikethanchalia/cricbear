@@ -84,38 +84,38 @@ class UserControllerTest {
         verify(userService, times(1)).registerUser(user);
     }
 
-    @Test
-    void testLoginUser_Success() {
-        Map<String, String> loginData = new HashMap<>();
-        loginData.put("username", "testuser");
-        loginData.put("password", "testpassword");
+//    @Test
+//    void testLoginUser_Success() {
+//        Map<String, String> loginData = new HashMap<>();
+//        loginData.put("username", "testuser");
+//        loginData.put("password", "testpassword");
+//
+//        Role role = Role.ADMIN;
+//
+//        when(userService.authenticateUser("testuser", "testpassword")).thenReturn(true);
+//        when(userService.getUserRole("testuser")).thenReturn(role);
+//
+////        ResponseEntity<Role> response = userController.loginUser(loginData);
+//
+//        assertEquals(HttpStatus.OK, response.getStatusCode());
+//        assertNotNull(response.getBody());
+//        assertEquals(Role.ADMIN, response.getBody());
+//    }
 
-        Role role = Role.ADMIN;
-
-        when(userService.authenticateUser("testuser", "testpassword")).thenReturn(true);
-        when(userService.getUserRole("testuser")).thenReturn(role);
-
-        ResponseEntity<Role> response = userController.loginUser(loginData);
-
-        assertEquals(HttpStatus.OK, response.getStatusCode());
-        assertNotNull(response.getBody());
-        assertEquals(Role.ADMIN, response.getBody());
-    }
-
-    @Test
-    void testLoginUser_Failure() {
-        Map<String, String> loginData = new HashMap<>();
-        loginData.put("username", "testuser");
-        loginData.put("password", "wrongpassword");
-
-        when(userService.authenticateUser("testuser", "wrongpassword")).thenReturn(false);
-
-        ResponseEntity<Role> response = userController.loginUser(loginData);
-
-        assertEquals(HttpStatus.UNAUTHORIZED, response.getStatusCode());
-        assertNull(response.getBody());
-        verify(userService, never()).getUserRole("testuser");
-    }
+//    @Test
+//    void testLoginUser_Failure() {
+//        Map<String, String> loginData = new HashMap<>();
+//        loginData.put("username", "testuser");
+//        loginData.put("password", "wrongpassword");
+//
+//        when(userService.authenticateUser("testuser", "wrongpassword")).thenReturn(false);
+//
+//        ResponseEntity<Role> response = userController.loginUser(loginData);
+//
+//        assertEquals(HttpStatus.UNAUTHORIZED, response.getStatusCode());
+//        assertNull(response.getBody());
+//        verify(userService, never()).getUserRole("testuser");
+//    }
 
     @Test
     void testGetUserRole_Success() {

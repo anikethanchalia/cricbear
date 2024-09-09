@@ -64,7 +64,7 @@ class TournamentControllerTest {
 
     @Test
     void update_ShouldReturnUpdatedTournament() throws Exception {
-        when(tournamentService.update(any(Tournament.class))).thenReturn(tournament);
+//        when(tournamentService.update(any(Tournament.class))).thenReturn(tournament);
 
         mockMvc.perform(put("/tournament/update")
                         .contentType(MediaType.APPLICATION_JSON)

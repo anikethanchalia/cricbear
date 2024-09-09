@@ -9,6 +9,9 @@ import org.springframework.stereotype.Service;
 import java.sql.Date;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
+import java.time.temporal.ChronoUnit;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
@@ -51,7 +54,23 @@ public class NotificationService {
         return notificationRepository.findAll();
     }
 
-    public List<Notification> findWithCurrentDate(Date date) {
-        return notificationRepository.findWithCurrentDate(date);
+    public List<Notification> findWithCurrentDate(LocalDateTime date) {
+
+        List<Notification> filteredNotifications = new ArrayList<>();
+//        System.out.println(notifications);
+        // Truncate the input date to minutes (ignoring seconds)
+        LocalDateTime truncatedInputDate = date.truncatedTo(ChronoUnit.MINUTES);
+        List<Notification> notifications = notificationRepository.findWithCurrentDate();
+        System.out.println(notifications);
+        // Iterate over all notifications and filter by date and time (without seconds)
+        for (Notification notification : notifications) {
+            LocalDateTime sentAt = notification.getSentAt().truncatedTo(ChronoUnit.MINUTES);
+
+            if (sentAt.equals(truncatedInputDate)) {
+                filteredNotifications.add(notification);
+            }
+        }
+
+        return filteredNotifications;
     }
 }

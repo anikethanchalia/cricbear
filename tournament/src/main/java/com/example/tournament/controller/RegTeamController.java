@@ -11,7 +11,7 @@ import java.util.List;
 
 @RestController
 @RequestMapping("/regTeam")
-@CrossOrigin(origins = {"http://localhost:3000", "http://localhost:3001"})
+@CrossOrigin(origins = {"http://localhost:3000", "http://localhost:3001", "*"})
 public class RegTeamController {
 
     @Autowired
@@ -50,16 +50,6 @@ public class RegTeamController {
         }
     }
 
-    @PutMapping("/update")
-    public ResponseEntity<String> updateRegTeam(@RequestBody RegTeam regTeam) {
-        if (regTeam == null) {
-            return new ResponseEntity<>(null,HttpStatus.BAD_REQUEST);
-        }
-        else {
-            regTeamService.updateRegTeam(regTeam);
-            return new ResponseEntity<>("Successfully updated", HttpStatus.OK);
-        }
-    }
 
     @GetMapping("/regTeamToTournament/{tid}/{teamid}")
     public ResponseEntity<?> regTeam(@PathVariable int tid, @PathVariable int teamid) {

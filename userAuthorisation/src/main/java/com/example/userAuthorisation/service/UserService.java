@@ -43,9 +43,18 @@ public class UserService {
         return null;
     }
 
-    public Boolean setUserRole(String username, Role role) {
-        User user = userRepository.findByUsername(username);
+    public Boolean setUserRole(int uid, Role role) {
+        User user = userRepository.findByUid(uid);
         user.setRole(role);
+        userRepository.save(user);
         return true;
     }
+
+    public User getByUid(int uid) {
+        return userRepository.findByUid(uid);
+    }
+    public User getByUsername(String username) {
+        return userRepository.findByUsername(username);
+    }
+
 }

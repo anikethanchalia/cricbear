@@ -12,7 +12,7 @@ import java.util.List;
 
 @RestController
 @RequestMapping("/player")
-@CrossOrigin(origins = {"http://localhost:3000", "http://localhost:3001"})
+@CrossOrigin(origins = {"http://localhost:3000", "http://localhost:3001", "*"})
 public class PlayerController {
 
     @Autowired

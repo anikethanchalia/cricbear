@@ -34,7 +34,7 @@ public class BallByBallService {
     private Thread taskThread;
     private static ArrayList<Object> possibleOutcomes = new ArrayList<>(Arrays.asList(0,1,2,3,4,5,6,"W",Extra.WIDE,Extra.NOBALL));
     private static final Random RANDOM = new Random();
-    private static final long DELAY = 2000;
+    private static final long DELAY = 1000;
     public static boolean enabled = false;
     public static boolean enabled2 = false;
     //    private BallByBall ballByBall;
@@ -55,8 +55,8 @@ public class BallByBallService {
 
     @Autowired
     private InningsRepository inningsRepository;
-    @Autowired
-    private MatchService matchService;
+//    @Autowired
+//    private MatchService matchService;
     @Autowired
     private TeamRepository teamRepository;
     @Autowired
@@ -309,9 +309,10 @@ public class BallByBallService {
                 inningsRepository.save(innings);
                 setToNew();
                 System.out.println(playing11Team2+" "+playing11Team1);
-                Match match = matchService.findById(MID);
-                match.setStatus(MatchStatus.COMPLETED);
-                matchService.update(match);
+//                Match match = matchService.findById(MID);
+//                match.setStatus(MatchStatus.COMPLETED);
+//                matchService.update(match);
+                teamService.updateAfterResultsForMatch(MID);
                 Team teamBattingSecond = teamService.getById(BOWLING_ID);
                 Team teamBattingFirst = teamService.getById(BATTING_ID);
                 if(target>0){
@@ -341,8 +342,8 @@ public class BallByBallService {
 
                 }
                 else {
-                    System.out.println(teamService.updateAfterResults(teamBattingSecond,1,0,0,1,0,0,0));
-                    System.out.println(teamService.updateAfterResults(teamBattingFirst,1,0,0,1,0,0,0));
+                    System.out.println(teamService.updateAfterResults(teamBattingSecond,1,0,0,1,0,1,0));
+                    System.out.println(teamService.updateAfterResults(teamBattingFirst,1,0,0,1,0,1,0));
                 }
                 enabled2 = false;
             }

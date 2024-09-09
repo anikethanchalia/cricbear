@@ -1,6 +1,9 @@
 package com.example.tournament.service;
 
+import com.example.tournament.model.Match;
+import com.example.tournament.model.MatchStatus;
 import com.example.tournament.model.Team;
+import com.example.tournament.repository.MatchRepository;
 import com.example.tournament.repository.TeamRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -11,6 +14,9 @@ import java.util.List;
 public class TeamService {
     @Autowired
     private TeamRepository teamRepository;
+
+    @Autowired
+    private MatchRepository matchRepository;
 
     public Team create(Team team) {
         if (teamRepository.findByTeamName(team.getTeamName()) == null)
@@ -59,5 +65,15 @@ public class TeamService {
         teamBatting.setPoints(teamBatting.getPoints()+points);
         teamBatting.setNrr(teamBatting.getNrr()+nrr);
         return teamRepository.save(teamBatting);
+    }
+
+    public void updateAfterResultsForMatch(int mid) {
+        Match match = matchRepository.getByMid(mid);
+        match.setStatus(MatchStatus.COMPLETED);
+        matchRepository.save(match);
+    }
+
+    public List<Team> findAllTeamsInDescendingOrder(){
+        return teamRepository.findAllTeamsInDescendingOrder();
     }
 }

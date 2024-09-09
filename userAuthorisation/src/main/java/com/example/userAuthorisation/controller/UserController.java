@@ -13,7 +13,7 @@ import java.util.Map;
 
 @RestController
 @RequestMapping("/user")
-@CrossOrigin(origins = {"http://localhost:3000", "http://localhost:3001"})
+@CrossOrigin(origins = {"http://localhost:3000", "http://localhost:3001", "*"})
 public class UserController {
 
     @Autowired
@@ -45,16 +45,16 @@ public class UserController {
 
     // Login user
     @PostMapping("/login")
-    public ResponseEntity<Role> loginUser(@RequestBody Map<String, String> user) {
+    public ResponseEntity<User> loginUser(@RequestBody Map<String, String> user) {
         String username = user.get("username");
         String password = user.get("password");
         boolean isAuthenticated = userService.authenticateUser(username, password);
         if (isAuthenticated) {
-            Role role = userService.getUserRole(username);
-            if (role != null) {
-                return ResponseEntity.ok(role);
+            User user1 = userService.getByUsername(username);
+            if (user1 != null) {
+                return ResponseEntity.ok(user1);
             } else {
-                return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
+                return new ResponseEntity<>(null,HttpStatus.INTERNAL_SERVER_ERROR);
             }
         } else {
             return new ResponseEntity<>(null,HttpStatus.UNAUTHORIZED);
@@ -74,13 +74,24 @@ public class UserController {
     }
 
     // Set user role
-    @PutMapping("/setUserRole/{username}/{role}")
-    public ResponseEntity<String> setUserRole(@PathVariable String username, @PathVariable Role role) {
-        boolean isUpdated = userService.setUserRole(username, role);
+    @PutMapping("/setUserRole/{uid}")
+    public ResponseEntity<String> setUserRole(@PathVariable Integer uid, @RequestBody Map<String,Role> role) {
+        boolean isUpdated = userService.setUserRole(uid, role.get("role"));
         if (isUpdated) {
             return new ResponseEntity<>("Role updated successfully", HttpStatus.OK);
         } else {
             return new ResponseEntity<>("User or role not found", HttpStatus.NOT_FOUND);
+        }
+    }
+
+    @GetMapping("/{uid}")
+    public ResponseEntity<User> getUser(@PathVariable int uid) {
+        User user = userService.getByUid(uid);
+
+        if (user != null) {
+            return new ResponseEntity<>(user, HttpStatus.OK);
+        } else {
+            return new ResponseEntity<>(null,HttpStatus.NOT_FOUND);
         }
     }
 }

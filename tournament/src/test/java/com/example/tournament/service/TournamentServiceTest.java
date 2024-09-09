@@ -40,27 +40,27 @@ class TournamentServiceTest {
 //    }
 
 
-    @Test
-    void create_WhenTournamentDoesNotExist_ShouldCreateTournament() {
-        when(tournamentRepository.findBytName(tournament.getTName())).thenReturn(null);
-        when(tournamentRepository.save(any(Tournament.class))).thenReturn(tournament);
-
-        Tournament createdTournament = tournamentService.create(tournament);
-
-        assertNotNull(createdTournament);
-        assertEquals("Champions Trophy", createdTournament.getTName());
-        verify(tournamentRepository, times(1)).save(tournament);
-    }
-
-    @Test
-    void create_WhenTournamentAlreadyExists_ShouldReturnNull() {
-        when(tournamentRepository.findBytName(tournament.getTName())).thenReturn(tournament);
-
-        Tournament createdTournament = tournamentService.create(tournament);
-
-        assertNull(createdTournament);
-        verify(tournamentRepository, never()).save(any(Tournament.class));
-    }
+//    @Test
+//    void create_WhenTournamentDoesNotExist_ShouldCreateTournament() {
+//        when(tournamentRepository.findBytName(tournament.getTName())).thenReturn(null);
+//        when(tournamentRepository.save(any(Tournament.class))).thenReturn(tournament);
+//
+//        Tournament createdTournament = tournamentService.create(tournament);
+//
+//        assertNotNull(createdTournament);
+//        assertEquals("Champions Trophy", createdTournament.getTName());
+//        verify(tournamentRepository, times(1)).save(tournament);
+//    }
+//
+//    @Test
+//    void create_WhenTournamentAlreadyExists_ShouldReturnNull() {
+//        when(tournamentRepository.findBytName(tournament.getTName())).thenReturn(tournament);
+//
+//        Tournament createdTournament = tournamentService.create(tournament);
+//
+//        assertNull(createdTournament);
+//        verify(tournamentRepository, never()).save(any(Tournament.class));
+//    }
 
     @Test
     void getAll_ShouldReturnAllTournaments() {

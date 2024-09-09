@@ -9,7 +9,6 @@ import org.springframework.stereotype.Service;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.time.temporal.ChronoUnit;
-import java.time.temporal.Temporal;
 import java.util.List;
 
 @Service
@@ -20,14 +19,20 @@ public class TournamentService {
 
 
     public Tournament create(Tournament tournament) {
-        if (tournamentRepository.findBytName(tournament.getTName()) == null) {
-            if(11 == Math.abs(ChronoUnit.DAYS.between((Temporal) tournament.getEndDate(), (Temporal) tournament.getStartDate()))) {
+        if (tournament.getTournamentName() == null || tournament.getTournamentName().isEmpty()) {
+            throw new IllegalArgumentException("Tournament name cannot be null or empty.");
+        }
+
+        if (tournamentRepository.findByTournamentName(tournament.getTournamentName()) == null) {
+            long duration = ChronoUnit.DAYS.between(tournament.getStartDate(), tournament.getEndDate());
+            if (duration >= 12) {
                 return tournamentRepository.save(tournament);
             }
             return null;
         }
         return null;
     }
+
 
     public List<Tournament> getAll() {
         return tournamentRepository.findAll();
@@ -43,9 +48,11 @@ public class TournamentService {
     }
 
 
-    public Tournament update(Tournament tournamentDetails) {
+    public Tournament update(Tournament tournamentDetails,int uid) {
+        if (tournamentDetails.getUid()!=uid)
+            return null;
         Tournament tournament = tournamentRepository.findByTid(tournamentDetails.getTid());
-        tournament.setTName(tournamentDetails.getTName());
+        tournament.setTournamentName(tournamentDetails.getTournamentName());
         tournament.setStartDate(tournamentDetails.getStartDate());
         tournament.setEndDate(tournamentDetails.getEndDate());
         tournament.setStatus(tournamentDetails.getStatus());
@@ -71,7 +78,7 @@ public class TournamentService {
         System.out.println(tournament.getStartDate().format(formatter).equals(formattedDateTime));
         if(tournament.getUid() == uid && tournament.getStartDate().format(formatter).equals(formattedDateTime)){
             tournament.setStatus(Status.LIVE);
-            tournament = update(tournament);
+            tournament = update(tournament,uid);
             return true;
         }
         else {

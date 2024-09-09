@@ -11,7 +11,7 @@ import java.util.List;
 
 @RestController
 @RequestMapping("/team")
-@CrossOrigin(origins = {"http://localhost:3000", "http://localhost:3001"})
+@CrossOrigin(origins = {"http://localhost:3000", "http://localhost:3001", "*"})
 public class TeamController {
 
     @Autowired
@@ -63,5 +63,10 @@ public class TeamController {
     public ResponseEntity<String> delete(@PathVariable Integer id) {
         teamService.delete(id);
         return new ResponseEntity<>("Deleted Successfully", HttpStatus.OK);
+    }
+
+    @GetMapping("/findInDesc")
+    public ResponseEntity<List<Team>> findInDesc() {
+        return new ResponseEntity<>(teamService.findAllTeamsInDescendingOrder(), HttpStatus.OK);
     }
 }
