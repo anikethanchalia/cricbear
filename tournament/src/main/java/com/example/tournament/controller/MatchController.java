@@ -72,9 +72,9 @@ public class MatchController {
         }
     }
 
-    @PostMapping("/status")
-    public ResponseEntity<List<MatchDTO>> status(@RequestBody Map<String, MatchStatus> status) {
-        return new ResponseEntity<>(matchService.findByStatus(status.get("status")),HttpStatus.OK);
+    @GetMapping("/status/{status}")
+    public ResponseEntity<List<MatchDTO>> status(@PathVariable MatchStatus status) {
+        return new ResponseEntity<>(matchService.findByStatus(status),HttpStatus.OK);
     }
 
     @GetMapping("/getByTid/{tid}")

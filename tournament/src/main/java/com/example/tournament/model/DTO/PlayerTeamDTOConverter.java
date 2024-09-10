@@ -11,10 +11,10 @@ public class PlayerTeamDTOConverter {
 
         int teamId = (Integer) row[0];
         int pid = (Integer) row[1];
-        String teamName = (String) row[1];
-        String name = (String) row[2];
-        boolean overseas = (Boolean) row[3];
-        PlayerRole playerRole = (PlayerRole) row[4];
+        String teamName = (String) row[2];
+        String name = (String) row[3];
+        boolean overseas = (Boolean) row[4];
+        PlayerRole playerRole = (PlayerRole) row[5];
 
         return new PlayerTeamDTO(teamId, pid, teamName, name, overseas, playerRole);
     }

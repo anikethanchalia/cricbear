@@ -24,7 +24,7 @@ public interface PlayerTeamRepository extends JpaRepository<PlayerTeam, Integer>
     @Query("SELECT pt FROM PlayerTeam pt JOIN Team t on t.teamId = :teamId")
     List<PlayerTeam> findByTeamId(@Param("teamId") int teamId);
 
-    @Query("SELECT t.teamId,t.teamName ,p.overseas,p.playerRole,p.pid FROM PlayerTeam pt JOIN Team t on pt.teamId = t.teamId, Player p WHERE p.pid = pt.pid")
+    @Query("SELECT t.teamId,p.pid ,t.teamName,p.name ,p.overseas,p.playerRole FROM PlayerTeam pt JOIN Team t on pt.teamId = t.teamId, Player p WHERE p.pid = pt.pid and t.teamId = :teamId")
     List<Object[]> findPlayerTeamByTeamId(@Param("teamId") int teamId);
 
     @Query(value = "SELECT p.name FROM team_player pt JOIN player_profile p on pt.pid = p.pid WHERE pt.teamId = :teamId AND pt.player_roles = :role and pt.overseas = :overseas LIMIT :limit",nativeQuery = true)

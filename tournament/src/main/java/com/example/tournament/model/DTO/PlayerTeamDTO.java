@@ -9,7 +9,7 @@ import lombok.NoArgsConstructor;
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
-public class PlayerTeamDTO extends PlayerTeam {
+public class PlayerTeamDTO {
     private int teamId;
     private int pid;
     private String teamName;
