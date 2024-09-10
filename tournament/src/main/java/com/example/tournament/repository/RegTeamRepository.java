@@ -16,4 +16,8 @@ public interface RegTeamRepository extends JpaRepository<RegTeam, Integer> {
     public ArrayList<RegTeam> findByGroupNumber(int groupNumber, int tid);
     @Query("select count(*) from RegTeam rt where rt.tid = :tid")
     public int countRegTeamByTid(int tid);
+
+
+    @Query("select rt from RegTeam rt where rt.tid = :tid and rt.teamid = :teamId")
+    RegTeam findByTidAndTeamId(int tid,int teamId);
 }

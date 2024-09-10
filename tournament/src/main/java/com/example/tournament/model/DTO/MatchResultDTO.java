@@ -22,5 +22,4 @@ public class MatchResultDTO {
     long runsScoredInSecondinnings;
     long wicketsInSecondinnings;
 
-
 }

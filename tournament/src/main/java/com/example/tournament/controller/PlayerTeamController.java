@@ -40,11 +40,11 @@ public class PlayerTeamController {
 
     // Add a new player team
     @PostMapping("/addPlayerTeam")
-    public ResponseEntity<PlayerTeam> addPlayerTeam(@RequestBody PlayerTeamDTO playerTeamDTO) {
-        if (playerTeamDTO == null) {
+    public ResponseEntity<List<PlayerTeam>> addPlayerTeam(@RequestBody List<PlayerTeam> playerTeam) {
+        if (playerTeam == null) {
             return new ResponseEntity<>(null,HttpStatus.BAD_REQUEST);
         }
-        PlayerTeam savedPlayerTeam = playerTeamService.savePlayerTeam(playerTeamDTO);
+        List<PlayerTeam> savedPlayerTeam = playerTeamService.savePlayerstoTeam(playerTeam);
         if (savedPlayerTeam != null) {
             return new ResponseEntity<>(savedPlayerTeam, HttpStatus.CREATED);
         } else {
@@ -73,7 +73,7 @@ public class PlayerTeamController {
     // Count player teams by team ID
     @GetMapping("/count/team/{id}")
     public ResponseEntity<Integer> count(@PathVariable int id) {
-        int count = playerTeamService.countByTeamId(id);
+        Integer count = playerTeamService.countByTeamId(id);
         return new ResponseEntity<>(count, HttpStatus.OK);
     }
 

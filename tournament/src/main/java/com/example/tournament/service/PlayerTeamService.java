@@ -46,80 +46,99 @@ public class PlayerTeamService {
 
         return playerTeamDTOs;
     }
-    public PlayerTeam savePlayerTeam(PlayerTeamDTO playerTeamDTO) {
-        int teamId = playerTeamDTO.getTeamId();
-        int pid = playerTeamDTO.getPid();
+    public List<PlayerTeam> savePlayerTeam(List<PlayerTeam> playerTeam) {
+        List<PlayerTeam> playerTeams = new ArrayList<>();
+        for (PlayerTeam playerTeamDTO1 : playerTeam) {
+            int teamId = playerTeamDTO1.getTeamId();
+            int pid = playerTeamDTO1.getPid();
 
-        PlayerRole playerRole = playerTeamDTO.getPlayerRole();
-        boolean overseas = playerTeamDTO.isOverseas();
+            PlayerRole playerRole = playerTeamDTO1.getPlayerRole();
+            boolean overseas = playerTeamDTO1.isOverseas();
 
-        // Check if playerRole is null
-        if (playerRole == null) {
-            throw new IllegalArgumentException("Player role cannot be null.");
+            // Check if playerRole is null
+            if (playerRole == null) {
+                throw new IllegalArgumentException("Player role cannot be null.");
+            }
+
+            // Retrieve existing player teams for the team
+            Long overseasCount = playerTeamRepository.countOverseasPlayers(teamId);
+//            long roleCount = playerTeamRepository.countPlayersByRole(teamId, playerRole);
+            List<PlayerTeam> existingPlayerTeams = playerTeamRepository.findByTeamId(teamId);
+
+            // Check if the player is already in the team
+            boolean playerExists = existingPlayerTeams.stream()
+                    .anyMatch(pt -> pt.getPid() == pid);
+
+            if (playerExists) {
+                throw new IllegalArgumentException("Player is already part of the team.");
+            }
+
+            // Check player count limit
+            if (existingPlayerTeams.size() >= MAX_PLAYERS) {
+                throw new IllegalArgumentException("Team already has the maximum number of players (15).");
+            }
+
+            // Validate overseas players
+            if (overseas && overseasCount >= MAX_OVERSEAS_PLAYERS) {
+                throw new IllegalArgumentException("Team already has the maximum number of overseas players (5).");
+            }
+
+            // Validate role count based on player role
+//            switch (playerRole) {
+//                case BATSMAN:
+//                    if (roleCount >= MAX_BATSMEN) {
+//                        throw new IllegalArgumentException("Team already has the maximum number of batsmen (6).");
+//                    }
+//                    break;
+//                case BOWLER:
+//                    if (roleCount >= MAX_BOWLERS) {
+//                        throw new IllegalArgumentException("Team already has the maximum number of bowlers (4).");
+//                    }
+//                    break;
+//                case ALLROUNDER:
+//                    if (roleCount >= MAX_ALLROUNDER) {
+//                        throw new IllegalArgumentException("Team already has the maximum number of all-rounders (3).");
+//                    }
+//                    break;
+//                case WICKETKEEPER:
+//                    if (roleCount >= MAX_WICKETKEEPERS) {
+//                        throw new IllegalArgumentException("Team already has the maximum number of wicketkeepers (2).");
+//                    }
+//                    break;
+//                default:
+//                    throw new IllegalArgumentException("Invalid player role.");
+//            }
+
+            // Convert DTO to entity
+            PlayerTeam playerTeam1 = new PlayerTeam();
+            playerTeam1.setTeamId(teamId);
+            playerTeam1.setPid(pid);
+            playerTeam1.setPlayerRole(playerRole);
+            playerTeam1.setOverseas(overseas);
+
+            // Save and return the entity
+            playerTeams.add(playerTeam1);
+            playerTeamRepository.save(playerTeam1);
         }
-
-        // Retrieve existing player teams for the team
-        long overseasCount = playerTeamRepository.countOverseasPlayers(teamId);
-        long roleCount = playerTeamRepository.countPlayersByRole(teamId, playerRole);
-        List<PlayerTeam> existingPlayerTeams = playerTeamRepository.findByTeamId(teamId);
-
-        // Check if the player is already in the team
-        boolean playerExists = existingPlayerTeams.stream()
-                .anyMatch(pt -> pt.getPid() == pid);
-
-        if (playerExists) {
-            throw new IllegalArgumentException("Player is already part of the team.");
-        }
-
-        // Check player count limit
-        if (existingPlayerTeams.size() >= MAX_PLAYERS) {
-            throw new IllegalArgumentException("Team already has the maximum number of players (15).");
-        }
-
-        // Validate overseas players
-        if (overseas && overseasCount >= MAX_OVERSEAS_PLAYERS) {
-            throw new IllegalArgumentException("Team already has the maximum number of overseas players (5).");
-        }
-
-        // Validate role count based on player role
-        switch (playerRole) {
-            case BATSMAN:
-                if (roleCount >= MAX_BATSMEN) {
-                    throw new IllegalArgumentException("Team already has the maximum number of batsmen (6).");
-                }
-                break;
-            case BOWLER:
-                if (roleCount >= MAX_BOWLERS) {
-                    throw new IllegalArgumentException("Team already has the maximum number of bowlers (4).");
-                }
-                break;
-            case ALLROUNDER:
-                if (roleCount >= MAX_ALLROUNDER) {
-                    throw new IllegalArgumentException("Team already has the maximum number of all-rounders (3).");
-                }
-                break;
-            case WICKETKEEPER:
-                if (roleCount >= MAX_WICKETKEEPERS) {
-                    throw new IllegalArgumentException("Team already has the maximum number of wicketkeepers (2).");
-                }
-                break;
-            default:
-                throw new IllegalArgumentException("Invalid player role.");
-        }
-
-        // Convert DTO to entity
-        PlayerTeam playerTeam = new PlayerTeam();
-        playerTeam.setTeamId(teamId);
-        playerTeam.setPid(pid);
-        playerTeam.setPlayerRole(playerRole);
-        playerTeam.setOverseas(overseas);
-
-        // Save and return the entity
-        return playerTeamRepository.save(playerTeam);
+        return playerTeams;
     }
 
 
-
+    public List<PlayerTeam> savePlayerstoTeam(List<PlayerTeam> playerTeam) {
+        List<PlayerTeam> playerTeams = new ArrayList<>();
+        for (PlayerTeam playerTeam1 : playerTeam) {
+            int teamId = playerTeam1.getTeamId();
+            Long count = playerTeamRepository.countByOverseas(teamId);
+            if(count>=5)
+                return null;
+            int count1 = playerTeamRepository.countByTeamId(teamId);
+            if(count1 >=15)
+                return null;
+            playerTeams.add(playerTeam1);
+            playerTeamRepository.save(playerTeam1);
+        }
+        return playerTeams;
+    }
 
     // Update an existing player team
     public PlayerTeam updatePlayerTeam(int tpid, PlayerTeam updatedPlayerTeam) {

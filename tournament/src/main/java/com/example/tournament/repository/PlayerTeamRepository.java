@@ -12,11 +12,11 @@ import java.util.List;
 @Repository
 public interface PlayerTeamRepository extends JpaRepository<PlayerTeam, Integer> {
 
-    @Query("SELECT COUNT(pt) FROM PlayerTeam pt WHERE pt.teamId = :teamId")
-    int countByTeamId(@Param("teamId") int teamId);
+//    @Query("SELECT COUNT(*) FROM PlayerTeam pt WHERE pt.teamId = :teamId")
+//    int countByTeamId(@Param("teamId") int teamId);
 
-    @Query("SELECT COUNT(pt) FROM PlayerTeam pt JOIN Player p ON pt.pid = p.pid WHERE pt.teamId = :teamId AND p.overseas = true")
-    long countOverseasPlayers(@Param("teamId") int teamId);
+    @Query("SELECT COUNT(pt) FROM PlayerTeam pt JOIN Player p ON pt.pid = p.pid WHERE pt.teamId = :teamId AND pt.overseas = true")
+    Long countOverseasPlayers(@Param("teamId") int teamId);
 
     @Query("SELECT COUNT(pt) FROM PlayerTeam pt JOIN Player p ON pt.pid = p.pid WHERE pt.teamId = :teamId AND p.playerRole = :playerRole")
     long countPlayersByRole(@Param("teamId") int teamId, @Param("playerRole") PlayerRole playerRole);
@@ -30,4 +30,9 @@ public interface PlayerTeamRepository extends JpaRepository<PlayerTeam, Integer>
     @Query(value = "SELECT p.name FROM team_player pt JOIN player_profile p on pt.pid = p.pid WHERE pt.teamId = :teamId AND pt.player_roles = :role and pt.overseas = :overseas LIMIT :limit",nativeQuery = true)
     List<String> findByRoleAndTeam(@Param("teamId") Integer teamId, @Param("role") String role, @Param("limit") int limit,@Param("overseas") boolean overseas);
 
+    @Query("select count(*) from PlayerTeam pt where pt.teamId = :teamId and pt.overseas=true")
+    Long countByOverseas(int teamId);
+
+    @Query("select count(*) from PlayerTeam pt where pt.teamId = :teamId")
+    Integer countByTeamId(int teamId);
 }

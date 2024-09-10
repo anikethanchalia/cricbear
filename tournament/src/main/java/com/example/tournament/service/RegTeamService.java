@@ -14,7 +14,17 @@ public class RegTeamService {
     private RegTeamRepository regTeamRepository;
 
     public RegTeam addRegTeam(RegTeam regTeam) {
+        int tid = regTeam.getTid();
+        int teamId = regTeam.getTeamid();
+        RegTeam regTeams = regTeamRepository.findByTidAndTeamId(tid,teamId);
+        if(regTeams != null) {
+            return null;
+        }
         int count = regTeamRepository.countByTid(regTeam.getTid());
+
+        if (count > 6) {
+            return null;
+        }
         if(count < 3) {
             regTeam.setGroupNumber(1);
         }
