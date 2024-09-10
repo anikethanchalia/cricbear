@@ -16,20 +16,20 @@ public class Notification {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column
+    @Column(name = "nid")
     private int nid;
 
-    @Column
+    @Column(name = "uid")
     private int uid;
 
 
-    @Column
+    @Column(name = "reminder_type")
     private String reminderType;
 
-    @Column
+    @Column(name = "message")
     private String message;
 
-    @Column
+    @Column(name = "sentAt")
     private LocalDateTime sentAt;
 
 

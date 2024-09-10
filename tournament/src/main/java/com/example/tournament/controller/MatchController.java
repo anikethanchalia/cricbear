@@ -78,7 +78,7 @@ public class MatchController {
     }
 
     @GetMapping("/getByTid/{tid}")
-    public ResponseEntity<List<Match>> getByTid(@PathVariable int tid) {
+    public ResponseEntity<List<MatchDTO>> getByTid(@PathVariable int tid) {
         return new ResponseEntity<>(matchService.findAllByTid(tid),HttpStatus.OK);
     }
 }

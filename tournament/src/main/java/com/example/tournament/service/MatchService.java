@@ -53,8 +53,20 @@ public class MatchService {
         matchRepository.delete(match);
     }
 
-    public List<Match> findAllByTid(Integer tid) {
-        return matchRepository.findAllByTid(tid);
+    public List<MatchDTO> findAllByTid(Integer tid) {
+        List<Match> matches = matchRepository.findAllByTid(tid);
+        List<MatchDTO> matchDTOs = new ArrayList<>();
+        for (Match match : matches) {
+            matchDTOs.add(new MatchDTO(match.getMid(),
+                    match.getTid(),
+                    teamRepository.findByTeamId(match.getTeamId1()).getTeamName(),
+                    teamRepository.findByTeamId(match.getTeamId2()).getTeamName(),
+                    match.getMatchDate(),
+                    match.getStadium(),
+                    match.getStatus(),
+                    match.getMatchType()));
+        }
+        return matchDTOs;
     }
 
     public List<Match> findByMatchType(MatchType matchType){
@@ -105,7 +117,6 @@ public class MatchService {
                 j++;
             }
         }
-//        System.out.println(matches);
         return matches;
     }
 
@@ -116,8 +127,6 @@ public class MatchService {
         ArrayList<Match> semiMatches = new ArrayList<>();
         List<Object[]> results1 = matchRepository.getSemiFinal(tid,1);
         List<Object[]> results2 = matchRepository.getSemiFinal(tid,2);
-        System.out.println(results1);
-        System.out.println(results2);
         ArrayList<MatchSemiDTO> matchDTO1 = new ArrayList<>();
         ArrayList<MatchSemiDTO> matchDTO2 = new ArrayList<>();
 
@@ -137,8 +146,6 @@ public class MatchService {
         semiMatches.add(match);
         Match match2 = new Match(matchDTO1.get(1).getTeamId(),matchDTO2.get(0).getTeamId(),t.getStartDate().toLocalDate().plusDays(9).atTime(18,00),MatchStatus.UPCOMING,"Chinnaswamy",tid,MatchType.SEMIFINAL);
         semiMatches.add(match2);
-//        System.out.println(semiMatches);
-//        System.out.println(matchDTO2);
         matchRepository.save(match);
         matchRepository.save(match2);
         return semiMatches;

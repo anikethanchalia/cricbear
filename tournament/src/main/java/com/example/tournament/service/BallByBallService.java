@@ -1,6 +1,7 @@
 package com.example.tournament.service;
 
 import com.example.tournament.model.*;
+import com.example.tournament.model.DTO.InningsDTO;
 import com.example.tournament.repository.BallByBallRepository;
 import com.example.tournament.repository.InningsRepository;
 import com.example.tournament.repository.TeamRepository;
@@ -11,10 +12,7 @@ import org.springframework.scheduling.annotation.EnableScheduling;
 import org.springframework.stereotype.Component;
 import org.springframework.stereotype.Service;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
-import java.util.Random;
+import java.util.*;
 
 import static com.example.tournament.service.InningsService.*;
 
@@ -365,5 +363,25 @@ public class BallByBallService {
             }
         }).start();
 //        System.out.println("Here");
+    }
+
+    //BallByBall display service
+    public Map<Integer, InningsDTO> getBallByBall(int mid){
+        List<Innings> innings = inningsRepository.findByMid(mid);
+        Map<Integer, InningsDTO> result = new HashMap<>();
+        if(innings.size()==0)
+            return null;
+        String battingTeamName = teamService.getById(innings.getFirst().getBattingId()).getTeamName();
+        String bowlingTeamName = teamService.getById(innings.getFirst().getBowlingId()).getTeamName();
+        InningsDTO inningsDTO1 = new InningsDTO(mid, battingTeamName, bowlingTeamName, ballByBallRepository.findByIid(innings.getFirst().getIid()));
+        result.put(1, inningsDTO1);
+        if(innings.size()==1){
+            return result;
+        }
+        battingTeamName = teamService.getById(innings.getLast().getBattingId()).getTeamName();
+        bowlingTeamName = teamService.getById(innings.getLast().getBowlingId()).getTeamName();
+        InningsDTO inningsDTO2 = new InningsDTO(mid, battingTeamName, bowlingTeamName, ballByBallRepository.findByIid(innings.getFirst().getIid()));
+        result.put(2, inningsDTO2);
+        return result;
     }
 }

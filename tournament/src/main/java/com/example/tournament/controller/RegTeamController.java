@@ -50,9 +50,4 @@ public class RegTeamController {
         }
     }
 
-
-    @GetMapping("/regTeamToTournament/{tid}/{teamid}")
-    public ResponseEntity<?> regTeam(@PathVariable int tid, @PathVariable int teamid) {
-        return new ResponseEntity<>(regTeamService.regTeam(tid, teamid), HttpStatus.OK);
-    }
 }

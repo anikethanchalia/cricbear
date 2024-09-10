@@ -21,13 +21,4 @@ public class MatchDTO {
     MatchStatus status;
     MatchType type;
 
-    public MatchDTO(int mid, int tid, String teamName, String teamName1, MatchStatus status, MatchType matchType) {
-        this.mid = mid;
-        this.tid = tid;
-        this.team1 = teamName;
-        this.team2 = teamName1;
-        this.status = status;
-        this.matchDate = LocalDateTime.now();
-        this.type = matchType;
-    }
 }

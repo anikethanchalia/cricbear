@@ -129,10 +129,10 @@ public class PlayerTeamService {
         for (PlayerTeam playerTeam1 : playerTeam) {
             int teamId = playerTeam1.getTeamId();
             Long count = playerTeamRepository.countByOverseas(teamId);
-            if(count>=5)
+            if(count > 5)
                 return null;
             int count1 = playerTeamRepository.countByTeamId(teamId);
-            if(count1 >=15)
+            if(count1 > 15)
                 return null;
             playerTeams.add(playerTeam1);
             playerTeamRepository.save(playerTeam1);

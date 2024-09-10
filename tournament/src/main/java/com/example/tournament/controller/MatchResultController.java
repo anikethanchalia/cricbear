@@ -14,6 +14,6 @@ public class MatchResultController {
 
     @GetMapping("/getResultById/{mid}")
     public ResponseEntity<?> getByMatchId(@PathVariable Integer mid) {
-        return ResponseEntity.ok(matchResultService.getByMatchId(mid));
+        return ResponseEntity.ok(matchResultService.getResultByMatchId(mid));
     }
 }

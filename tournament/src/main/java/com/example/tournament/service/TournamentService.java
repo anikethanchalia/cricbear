@@ -73,9 +73,6 @@ public class TournamentService {
         LocalDateTime now = LocalDateTime.now();
         DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd");
         String formattedDateTime = now.format(formatter);
-        System.out.println(formattedDateTime);
-        System.out.println(tournament.getStartDate().format(formatter));
-        System.out.println(tournament.getStartDate().format(formatter).equals(formattedDateTime));
         if(tournament.getUid() == uid && tournament.getStartDate().format(formatter).equals(formattedDateTime)){
             tournament.setStatus(Status.LIVE);
             tournament = update(tournament,uid);
