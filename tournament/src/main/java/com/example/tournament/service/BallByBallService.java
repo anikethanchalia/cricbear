@@ -380,7 +380,7 @@ public class BallByBallService {
         }
         battingTeamName = teamService.getById(innings.getLast().getBattingId()).getTeamName();
         bowlingTeamName = teamService.getById(innings.getLast().getBowlingId()).getTeamName();
-        InningsDTO inningsDTO2 = new InningsDTO(mid, battingTeamName, bowlingTeamName, ballByBallRepository.findByIid(innings.getFirst().getIid()));
+        InningsDTO inningsDTO2 = new InningsDTO(mid, battingTeamName, bowlingTeamName, ballByBallRepository.findByIid(innings.getLast().getIid()));
         result.put(2, inningsDTO2);
         return result;
     }
