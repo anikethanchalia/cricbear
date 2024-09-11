@@ -2,6 +2,7 @@ package com.example.tournament.repository;
 
 import com.example.tournament.model.PlayerRole;
 import com.example.tournament.model.PlayerTeam;
+import jakarta.transaction.Transactional;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
@@ -35,4 +36,7 @@ public interface PlayerTeamRepository extends JpaRepository<PlayerTeam, Integer>
 
     @Query("select count(*) from PlayerTeam pt where pt.teamId = :teamId")
     Integer countByTeamId(int teamId);
+
+    @Transactional
+    int deleteByPid(int pid);
 }

@@ -20,6 +20,7 @@ import java.util.List;
 
 @Service
 public class MatchService {
+
     @Autowired
     private MatchRepository matchRepository;
 
@@ -34,6 +35,7 @@ public class MatchService {
 
     @Autowired
     private MatchResultService matchResultService;
+
     @Autowired
     private TeamRepository teamRepository;
 
@@ -84,12 +86,15 @@ public class MatchService {
             DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd");
             String formattedDateTime = now.format(formatter);
             if (formattedDateTime.equals(formatter.format(match.getMatchDate()))){
+                match.setStatus(MatchStatus.LIVE);
+                matchRepository.save(match);
                 inningsService.startMatch(mid);
                 return "Match started";
             }
         }
         return null;
     }
+
     public ArrayList<Match> scheduleMatches(Integer tid,int uid) {
         Tournament t = tournamentService.getByTid(tid);
         if(t.getUid()!=uid)

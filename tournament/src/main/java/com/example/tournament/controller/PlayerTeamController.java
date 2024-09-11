@@ -64,10 +64,15 @@ public class PlayerTeamController {
     }
 
     // Delete a player team by ID
-    @DeleteMapping("/delete/{tpid}")
-    public ResponseEntity<Void> deletePlayerTeam(@PathVariable int tpid) {
-        playerTeamService.deletePlayerTeam(tpid);
-        return new ResponseEntity<>(null,HttpStatus.NO_CONTENT);
+    @DeleteMapping("/delete/{pid}")
+    public ResponseEntity<String> deletePlayerTeam(@PathVariable int pid) {
+        int isDeleted= playerTeamService.deletePlayerTeam(pid);
+        if(isDeleted==1) {
+            return new ResponseEntity<>("Deleted", HttpStatus.NO_CONTENT);
+        }
+        else {
+            return new ResponseEntity<>(null, HttpStatus.NOT_FOUND);
+        }
     }
 
     // Count player teams by team ID

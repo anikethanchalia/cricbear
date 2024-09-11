@@ -4,6 +4,7 @@ import com.example.tournament.model.*;
 import com.example.tournament.model.DTO.PlayerTeamDTO;
 import com.example.tournament.model.DTO.PlayerTeamDTOConverter;
 import com.example.tournament.repository.PlayerTeamRepository;
+import jakarta.transaction.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -162,8 +163,9 @@ public class PlayerTeamService {
     }
 
     // Delete a player team by ID
-    public void deletePlayerTeam(int tpid) {
-        playerTeamRepository.deleteById(tpid);
+    @Transactional
+    public int deletePlayerTeam(int pid) {
+        return playerTeamRepository.deleteByPid(pid);
     }
 
     // Count players by team ID
