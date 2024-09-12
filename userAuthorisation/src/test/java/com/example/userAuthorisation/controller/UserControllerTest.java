@@ -7,16 +7,26 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
+import org.mockito.MockitoAnnotations;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
+import org.springframework.test.web.servlet.MockMvc;
+import org.springframework.test.web.servlet.setup.MockMvcBuilders;
+import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
+import org.springframework.test.web.servlet.result.MockMvcResultMatchers;
+import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 
-import java.util.*;
+import java.util.Arrays;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
-import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
-import static org.mockito.MockitoAnnotations.openMocks;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 
-class UserControllerTest {
+public class UserControllerTest {
 
     @Mock
     private UserService userService;
@@ -24,125 +34,148 @@ class UserControllerTest {
     @InjectMocks
     private UserController userController;
 
+    private MockMvc mockMvc;
+
     @BeforeEach
-    void setUp() {
-        openMocks(this);
+    public void setUp() {
+        MockitoAnnotations.openMocks(this);
+        mockMvc = MockMvcBuilders.standaloneSetup(userController).build();
     }
 
     @Test
-    void testGetAllUsers() {
+    public void testGetAllUsers() throws Exception {
         User user1 = new User();
         User user2 = new User();
-        List<User> userList = Arrays.asList(user1, user2);
+        List<User> users = Arrays.asList(user1, user2);
 
-        when(userService.getAllUsers()).thenReturn(userList);
+        when(userService.getAllUsers()).thenReturn(users);
 
-        ResponseEntity<List<User>> response = userController.getAllUsers();
-
-        assertEquals(HttpStatus.OK, response.getStatusCode());
-        assertEquals(2, Objects.requireNonNull(response.getBody()).size());
-        assertTrue(response.getBody().contains(user1));
-        assertTrue(response.getBody().contains(user2));
+        mockMvc.perform(MockMvcRequestBuilders.get("/user/all")
+                        .accept(MediaType.APPLICATION_JSON))
+                .andExpect(status().isOk())
+                .andExpect(MockMvcResultMatchers.jsonPath("$").isArray())
+                .andExpect(MockMvcResultMatchers.jsonPath("$[0]").isNotEmpty())
+                .andExpect(MockMvcResultMatchers.jsonPath("$[1]").isNotEmpty());
     }
 
     @Test
-    void testGetAllUsers_NoContent() {
-        when(userService.getAllUsers()).thenReturn(Collections.emptyList());
+    public void testRegisterUser_Success() throws Exception {
+        User user = new User();
+        user.setUsername("testuser");
+        user.setPassword("password");
 
-        ResponseEntity<List<User>> response = userController.getAllUsers();
+        when(userService.registerUser(any(User.class))).thenReturn(user);
 
-        assertEquals(HttpStatus.NO_CONTENT, response.getStatusCode());
-        assertTrue(response.getBody().isEmpty());
+        mockMvc.perform(MockMvcRequestBuilders.post("/user/register")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("{\"username\":\"testuser\",\"password\":\"password\"}"))
+                .andExpect(status().isCreated())
+                .andExpect(MockMvcResultMatchers.jsonPath("$.username").value("testuser"));
     }
 
     @Test
-    void testRegisterUser_Success() {
+    public void testRegisterUser_Failure() throws Exception {
+        when(userService.registerUser(any(User.class))).thenReturn(null);
+
+        mockMvc.perform(MockMvcRequestBuilders.post("/user/register")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("{\"username\":\"testuser\",\"password\":\"password\"}"))
+                .andExpect(status().isInternalServerError());
+    }
+
+    @Test
+    public void testLoginUser_Success() throws Exception {
         User user = new User();
         user.setUsername("testuser");
 
-        when(userService.registerUser(user)).thenReturn(user);
+        when(userService.authenticateUser("testuser", "password")).thenReturn(true);
+        when(userService.getByUsername("testuser")).thenReturn(user);
 
-        ResponseEntity<User> response = userController.registerUser(user);
-
-        assertEquals(HttpStatus.CREATED, response.getStatusCode());
-        assertNotNull(response.getBody());
-        assertEquals("testuser", response.getBody().getUsername());
-        verify(userService, times(1)).registerUser(user);
+        mockMvc.perform(MockMvcRequestBuilders.post("/user/login")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("{\"username\":\"testuser\",\"password\":\"password\"}"))
+                .andExpect(status().isOk())
+                .andExpect(MockMvcResultMatchers.jsonPath("$.username").value("testuser"));
     }
 
     @Test
-    void testRegisterUser_Failure() {
-        User user = new User();
-        user.setUsername("existinguser");
+    public void testLoginUser_Failure() throws Exception {
+        when(userService.authenticateUser("testuser", "password")).thenReturn(false);
 
-        when(userService.registerUser(user)).thenReturn(null);
-
-        ResponseEntity<User> response = userController.registerUser(user);
-
-        assertEquals(HttpStatus.INTERNAL_SERVER_ERROR, response.getStatusCode());
-        assertNull(response.getBody());
-        verify(userService, times(1)).registerUser(user);
+        mockMvc.perform(MockMvcRequestBuilders.post("/user/login")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("{\"username\":\"testuser\",\"password\":\"password\"}"))
+                .andExpect(status().isUnauthorized());
     }
 
-//    @Test
-//    void testLoginUser_Success() {
-//        Map<String, String> loginData = new HashMap<>();
-//        loginData.put("username", "testuser");
-//        loginData.put("password", "testpassword");
-//
-//        Role role = Role.ADMIN;
-//
-//        when(userService.authenticateUser("testuser", "testpassword")).thenReturn(true);
-//        when(userService.getUserRole("testuser")).thenReturn(role);
-//
-////        ResponseEntity<Role> response = userController.loginUser(loginData);
-//
-//        assertEquals(HttpStatus.OK, response.getStatusCode());
-//        assertNotNull(response.getBody());
-//        assertEquals(Role.ADMIN, response.getBody());
-//    }
-
-//    @Test
-//    void testLoginUser_Failure() {
-//        Map<String, String> loginData = new HashMap<>();
-//        loginData.put("username", "testuser");
-//        loginData.put("password", "wrongpassword");
-//
-//        when(userService.authenticateUser("testuser", "wrongpassword")).thenReturn(false);
-//
-//        ResponseEntity<Role> response = userController.loginUser(loginData);
-//
-//        assertEquals(HttpStatus.UNAUTHORIZED, response.getStatusCode());
-//        assertNull(response.getBody());
-//        verify(userService, never()).getUserRole("testuser");
-//    }
-
     @Test
-    void testGetUserRole_Success() {
-        Map<String, String> requestData = new HashMap<>();
-        requestData.put("username", "testuser");
-
+    public void testGetUserRole() throws Exception {
         Role role = Role.ADMIN;
-
         when(userService.getUserRole("testuser")).thenReturn(role);
 
-        ResponseEntity<Role> response = userController.getUserRole(requestData);
-
-        assertEquals(HttpStatus.OK, response.getStatusCode());
-        assertNotNull(response.getBody());
-        assertEquals(Role.ADMIN, response.getBody());
+        mockMvc.perform(MockMvcRequestBuilders.post("/user/getRole")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("{\"username\":\"testuser\"}"))
+                .andExpect(status().isOk())
+                .andExpect(MockMvcResultMatchers.jsonPath("$").value("ADMIN"));
     }
 
     @Test
-    void testGetUserRole_Failure() {
-        Map<String, String> requestData = new HashMap<>();
-        requestData.put("username", "nonexistinguser");
+    public void testGetUserRole_NotFound() throws Exception {
+        when(userService.getUserRole("testuser")).thenReturn(null);
 
-        when(userService.getUserRole("nonexistinguser")).thenReturn(null);
+        mockMvc.perform(MockMvcRequestBuilders.post("/user/getRole")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("{\"username\":\"testuser\"}"))
+                .andExpect(status().isNotFound());
+    }
 
-        ResponseEntity<Role> response = userController.getUserRole(requestData);
+    @Test
+    public void testSetUserRole_Success() throws Exception {
+        Map<String, Role> roleMap = new HashMap<>();
+        roleMap.put("role", Role.ADMIN);
 
-        assertEquals(HttpStatus.NOT_FOUND, response.getStatusCode());
-        assertNull(response.getBody());
+        when(userService.setUserRole(1, Role.ADMIN)).thenReturn(true);
+
+        mockMvc.perform(MockMvcRequestBuilders.put("/user/setUserRole/1")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("{\"role\":\"ADMIN\"}"))
+                .andExpect(status().isOk())
+                .andExpect(MockMvcResultMatchers.content().string("Role updated successfully"));
+    }
+
+    @Test
+    public void testSetUserRole_NotFound() throws Exception {
+        Map<String, Role> roleMap = new HashMap<>();
+        roleMap.put("role", Role.ADMIN);
+
+        when(userService.setUserRole(1, Role.ADMIN)).thenReturn(false);
+
+        mockMvc.perform(MockMvcRequestBuilders.put("/user/setUserRole/1")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("{\"role\":\"ADMIN\"}"))
+                .andExpect(status().isNotFound());
+    }
+
+    @Test
+    public void testGetUser() throws Exception {
+        User user = new User();
+        user.setUid(1);
+
+        when(userService.getByUid(1)).thenReturn(user);
+
+        mockMvc.perform(MockMvcRequestBuilders.get("/user/1")
+                        .accept(MediaType.APPLICATION_JSON))
+                .andExpect(status().isOk())
+                .andExpect(MockMvcResultMatchers.jsonPath("$.uid").value(1));
+    }
+
+    @Test
+    public void testGetUser_NotFound() throws Exception {
+        when(userService.getByUid(1)).thenReturn(null);
+
+        mockMvc.perform(MockMvcRequestBuilders.get("/user/1")
+                        .accept(MediaType.APPLICATION_JSON))
+                .andExpect(status().isNotFound());
     }
 }

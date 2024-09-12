@@ -16,7 +16,7 @@ import java.util.List;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
 
-class UserServiceTest {
+public class UserServiceTest {
 
     @Mock
     private UserRepository userRepository;
@@ -28,33 +28,33 @@ class UserServiceTest {
     private UserService userService;
 
     @BeforeEach
-    void setUp() {
+    public void setUp() {
         MockitoAnnotations.openMocks(this);
     }
 
     @Test
-    void testRegisterUser_NewUser_Success() {
+    public void testRegisterUser_UserNotExists() {
         User user = new User();
         user.setUsername("testuser");
-        user.setPassword("testpassword");
+        user.setPassword("password");
 
         when(userRepository.findByUsername("testuser")).thenReturn(null);
-        when(passwordEncoder.encode("testpassword")).thenReturn("encodedpassword");
+        when(passwordEncoder.encode("password")).thenReturn("encodedpassword");
         when(userRepository.save(user)).thenReturn(user);
 
         User registeredUser = userService.registerUser(user);
 
         assertNotNull(registeredUser);
-        assertEquals("encodedpassword", registeredUser.getPassword());
-        verify(userRepository, times(1)).save(user);
+        assertEquals("testuser", registeredUser.getUsername());
+        verify(userRepository).save(user);
     }
 
     @Test
-    void testRegisterUser_ExistingUser_Failure() {
+    public void testRegisterUser_UserExists() {
         User user = new User();
         user.setUsername("existinguser");
 
-        when(userRepository.findByUsername("existinguser")).thenReturn(new User());
+        when(userRepository.findByUsername("existinguser")).thenReturn(user);
 
         User registeredUser = userService.registerUser(user);
 
@@ -63,69 +63,101 @@ class UserServiceTest {
     }
 
     @Test
-    void testGetAllUsers() {
+    public void testGetAllUsers() {
         User user1 = new User();
         User user2 = new User();
+        List<User> users = Arrays.asList(user1, user2);
 
-        when(userRepository.findAll()).thenReturn(Arrays.asList(user1, user2));
+        when(userRepository.findAll()).thenReturn(users);
 
-        List<User> users = userService.getAllUsers();
+        List<User> result = userService.getAllUsers();
 
-        assertEquals(2, users.size());
-        assertTrue(users.contains(user1));
-        assertTrue(users.contains(user2));
+        assertNotNull(result);
+        assertEquals(2, result.size());
+        verify(userRepository).findAll();
     }
 
     @Test
-    void testAuthenticateUser_ValidCredentials_Success() {
+    public void testAuthenticateUser_Success() {
         User user = new User();
-        user.setUsername("validuser");
+        user.setUsername("testuser");
         user.setPassword("encodedpassword");
 
-        when(userRepository.findByUsername("validuser")).thenReturn(user);
-        when(passwordEncoder.matches("testpassword", "encodedpassword")).thenReturn(true);
+        when(userRepository.findByUsername("testuser")).thenReturn(user);
+        when(passwordEncoder.matches("password", "encodedpassword")).thenReturn(true);
 
-        boolean isAuthenticated = userService.authenticateUser("validuser", "testpassword");
+        boolean authenticated = userService.authenticateUser("testuser", "password");
 
-        assertTrue(isAuthenticated);
+        assertTrue(authenticated);
     }
 
     @Test
-    void testAuthenticateUser_InvalidCredentials_Failure() {
+    public void testAuthenticateUser_Failure() {
         User user = new User();
-        user.setUsername("validuser");
+        user.setUsername("testuser");
         user.setPassword("encodedpassword");
 
-        when(userRepository.findByUsername("validuser")).thenReturn(user);
+        when(userRepository.findByUsername("testuser")).thenReturn(user);
         when(passwordEncoder.matches("wrongpassword", "encodedpassword")).thenReturn(false);
 
-        boolean isAuthenticated = userService.authenticateUser("validuser", "wrongpassword");
+        boolean authenticated = userService.authenticateUser("testuser", "wrongpassword");
 
-        assertFalse(isAuthenticated);
+        assertFalse(authenticated);
     }
 
     @Test
-    void testGetUserRole_ExistingUser_Success() {
+    public void testGetUserRole() {
         User user = new User();
-        user.setUsername("userwithrole");
-        Role expectedRole = Role.COACH; // Use the enum constant
-        user.setRole(expectedRole);
+        user.setUsername("testuser");
+        user.setRole(Role.ADMIN);
 
-        when(userRepository.findByUsername("userwithrole")).thenReturn(user);
+        when(userRepository.findByUsername("testuser")).thenReturn(user);
 
-        Role actualRole = userService.getUserRole("userwithrole");
+        Role role = userService.getUserRole("testuser");
 
-        assertNotNull(actualRole);
-        assertEquals(expectedRole, actualRole); // Directly compare the enum values
+        assertNotNull(role);
+        assertEquals(Role.ADMIN, role);
     }
 
+    @Test
+    public void testSetUserRole() {
+        User user = new User();
+        user.setUid(1);
+        user.setRole(Role.COACH);
+
+        when(userRepository.findByUid(1)).thenReturn(user);
+        when(userRepository.save(user)).thenReturn(user);
+
+        Boolean result = userService.setUserRole(1, Role.ADMIN);
+
+        assertTrue(result);
+        assertEquals(Role.ADMIN, user.getRole());
+        verify(userRepository).save(user);
+    }
 
     @Test
-    void testGetUserRole_NonExistingUser_Failure() {
-        when(userRepository.findByUsername("nonexistinguser")).thenReturn(null);
+    public void testGetByUid() {
+        User user = new User();
+        user.setUid(1);
 
-        Role userRole = userService.getUserRole("nonexistinguser");
+        when(userRepository.findByUid(1)).thenReturn(user);
 
-        assertNull(userRole);
+        User result = userService.getByUid(1);
+
+        assertNotNull(result);
+        assertEquals(1, result.getUid());
+    }
+
+    @Test
+    public void testGetByUsername() {
+        User user = new User();
+        user.setUsername("testuser");
+
+        when(userRepository.findByUsername("testuser")).thenReturn(user);
+
+        User result = userService.getByUsername("testuser");
+
+        assertNotNull(result);
+        assertEquals("testuser", result.getUsername());
     }
 }

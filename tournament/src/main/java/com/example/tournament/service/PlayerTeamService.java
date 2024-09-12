@@ -3,6 +3,7 @@ package com.example.tournament.service;
 import com.example.tournament.model.*;
 import com.example.tournament.model.DTO.PlayerTeamDTO;
 import com.example.tournament.model.DTO.PlayerTeamDTOConverter;
+import com.example.tournament.repository.PlayerRepository;
 import com.example.tournament.repository.PlayerTeamRepository;
 import jakarta.transaction.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -24,6 +25,8 @@ public class PlayerTeamService {
     private static final int MAX_BOWLERS = 4;
     private static final int MAX_ALLROUNDER = 4;
     private static final int MAX_WICKETKEEPERS = 1;
+    @Autowired
+    private PlayerRepository playerRepository;
 
     // Retrieve all player teams
     public List<PlayerTeam> getAllPlayerTeams() {
@@ -142,21 +145,20 @@ public class PlayerTeamService {
     }
 
     // Update an existing player team
-    public PlayerTeam updatePlayerTeam(int tpid, PlayerTeam updatedPlayerTeam) {
-        Optional<PlayerTeam> existingPlayerTeamOpt = playerTeamRepository.findById(tpid);
-
-        if (existingPlayerTeamOpt.isPresent()) {
-            PlayerTeam playerTeam = existingPlayerTeamOpt.get();
+    public PlayerTeam updatePlayerTeam(PlayerTeam updatedPlayer, int pid) {
+        PlayerTeam existingPlayerTeam = playerTeamRepository.findByPid(pid);
+        Player existingPlayer = playerRepository.findByPid(pid);
+        if (existingPlayer != null) {
 
             // Update player details
-            playerTeam.setRunsScored(updatedPlayerTeam.getRunsScored());
-            playerTeam.setBalls(updatedPlayerTeam.getBalls());
-            playerTeam.setWickets(updatedPlayerTeam.getWickets());
-            playerTeam.setOvers(updatedPlayerTeam.getOvers());
-            playerTeam.setRunsGiven(updatedPlayerTeam.getRunsGiven());
+            existingPlayerTeam.setRunsScored(updatedPlayer.getRunsScored()+ existingPlayerTeam.getRunsScored());
+            existingPlayerTeam.setBalls(updatedPlayer.getBalls()+ existingPlayerTeam.getBalls());
+            existingPlayerTeam.setWickets(updatedPlayer.getWickets()+ existingPlayerTeam.getWickets());
+            existingPlayerTeam.setOvers(updatedPlayer.getOvers()+ existingPlayerTeam.getOvers());
+            existingPlayerTeam.setRunsGiven(updatedPlayer.getRunsGiven()+ existingPlayerTeam.getRunsGiven());
 
             // Save and return the updated entity
-            return playerTeamRepository.save(playerTeam);
+            return playerTeamRepository.save(existingPlayerTeam);
         } else {
             return null; // Handle case where the player team is not found
         }

@@ -8,16 +8,19 @@ import org.junit.jupiter.api.Test;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
+import org.springframework.test.context.junit.jupiter.SpringJUnitConfig;
 
-import java.sql.Date;
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.Arrays;
 import java.util.List;
-import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
 
-class TournamentServiceTest {
+@SpringJUnitConfig
+public class TournamentServiceTest {
 
     @Mock
     private TournamentRepository tournamentRepository;
@@ -25,108 +28,190 @@ class TournamentServiceTest {
     @InjectMocks
     private TournamentService tournamentService;
 
-    private Tournament tournament;
-
-
-//    @BeforeEach
-//    void setUp() {
-//        MockitoAnnotations.openMocks(this);
-//        tournament = new Tournament();
-//        tournament.setTid(1);
-//        tournament.setTName("Champions Trophy");
-//        tournament.setStartDate(Date.valueOf("2024-09-01"));  // Convert String to java.sql.Date
-//        tournament.setEndDate(Date.valueOf("2024-09-10"));    // Convert String to java.sql.Date
-//        tournament.setStatus(Status.UPCOMING);
-//    }
-
-
-//    @Test
-//    void create_WhenTournamentDoesNotExist_ShouldCreateTournament() {
-//        when(tournamentRepository.findBytName(tournament.getTName())).thenReturn(null);
-//        when(tournamentRepository.save(any(Tournament.class))).thenReturn(tournament);
-//
-//        Tournament createdTournament = tournamentService.create(tournament);
-//
-//        assertNotNull(createdTournament);
-//        assertEquals("Champions Trophy", createdTournament.getTName());
-//        verify(tournamentRepository, times(1)).save(tournament);
-//    }
-//
-//    @Test
-//    void create_WhenTournamentAlreadyExists_ShouldReturnNull() {
-//        when(tournamentRepository.findBytName(tournament.getTName())).thenReturn(tournament);
-//
-//        Tournament createdTournament = tournamentService.create(tournament);
-//
-//        assertNull(createdTournament);
-//        verify(tournamentRepository, never()).save(any(Tournament.class));
-//    }
-
-    @Test
-    void getAll_ShouldReturnAllTournaments() {
-        when(tournamentRepository.findAll()).thenReturn(Arrays.asList(tournament));
-
-        List<Tournament> tournaments = tournamentService.getAll();
-
-        assertEquals(1, tournaments.size());
-        verify(tournamentRepository, times(1)).findAll();
+    @BeforeEach
+    public void setUp() {
+        MockitoAnnotations.openMocks(this);
     }
 
     @Test
-    void getById_ShouldReturnTournament() {
+    public void testCreate_Success() {
+        Tournament tournament = new Tournament();
+        tournament.setTournamentName("Test Tournament");
+        tournament.setStartDate(LocalDateTime.now().minusDays(15));
+        tournament.setEndDate(LocalDateTime.now().plusDays(15));
+
+        when(tournamentRepository.findByTournamentName("Test Tournament")).thenReturn(null);
+        when(tournamentRepository.save(tournament)).thenReturn(tournament);
+
+        Tournament createdTournament = tournamentService.create(tournament);
+
+        assertNotNull(createdTournament);
+        assertEquals("Test Tournament", createdTournament.getTournamentName());
+    }
+
+    @Test
+    public void testCreate_Failure_DurationTooShort() {
+        Tournament tournament = new Tournament();
+        tournament.setTournamentName("Short Tournament");
+        tournament.setStartDate(LocalDateTime.now().minusDays(5));
+        tournament.setEndDate(LocalDateTime.now().plusDays(10));
+
+        when(tournamentRepository.findByTournamentName("Short Tournament")).thenReturn(null);
+
+        Tournament createdTournament = tournamentService.create(tournament);
+
+        assertNull(createdTournament);
+    }
+
+    @Test
+    public void testCreate_Failure_NameExists() {
+        Tournament tournament = new Tournament();
+        tournament.setTournamentName("Existing Tournament");
+
+        when(tournamentRepository.findByTournamentName("Existing Tournament")).thenReturn(new Tournament());
+
+        Tournament createdTournament = tournamentService.create(tournament);
+
+        assertNull(createdTournament);
+    }
+
+    @Test
+    public void testGetAll() {
+        Tournament tournament1 = new Tournament();
+        Tournament tournament2 = new Tournament();
+        List<Tournament> tournaments = Arrays.asList(tournament1, tournament2);
+
+        when(tournamentRepository.findAll()).thenReturn(tournaments);
+
+        List<Tournament> result = tournamentService.getAll();
+
+        assertNotNull(result);
+        assertEquals(2, result.size());
+    }
+
+    @Test
+    public void testGetById() {
+        Tournament tournament = new Tournament();
+        tournament.setUid(1);
+
         when(tournamentRepository.findByUid(1)).thenReturn(tournament);
 
-        Tournament foundTournament = tournamentService.getById(1);
+        Tournament result = tournamentService.getById(1);
 
-        assertNotNull(foundTournament);
-        assertEquals(1, foundTournament.getTid());
-        verify(tournamentRepository, times(1)).findByUid(1);
-    }
-
-//    @Test
-//    void update_ShouldUpdateAndReturnTournament() {
-//        Tournament updatedDetails = new Tournament();
-//        updatedDetails.setTid(1);
-//        updatedDetails.setTName("Updated Trophy");
-//        updatedDetails.setStartDate(Date.valueOf("2024-09-02"));  // Convert String to java.sql.Date
-//        updatedDetails.setEndDate(Date.valueOf("2024-09-11"));    // Convert String to java.sql.Date
-//        updatedDetails.setStatus(Status.LIVE);
-//
-//
-//        when(tournamentRepository.findByTid(1)).thenReturn(tournament);
-//        when(tournamentRepository.save(any(Tournament.class))).thenReturn(updatedDetails);
-//
-//        Tournament updatedTournament = tournamentService.update(updatedDetails);
-//
-//        assertNotNull(updatedTournament);
-//        assertEquals("Updated Trophy", updatedTournament.getTName());
-//        assertEquals(Status.LIVE, updatedTournament.getStatus());
-//        verify(tournamentRepository, times(1)).save(updatedTournament);
-//    }
-
-    @Test
-    void delete_ShouldDeleteTournamentById() {
-        doNothing().when(tournamentRepository).deleteById(1);
-
-        tournamentService.delete(1);
-
-        verify(tournamentRepository, times(1)).deleteById(1);
+        assertNotNull(result);
+        assertEquals(1, result.getUid());
     }
 
     @Test
-    void getByStatus_ShouldReturnTournamentsWithStatus() {
-        when(tournamentRepository.findAllByStatus(Status.UPCOMING)).thenReturn(Arrays.asList(tournament));
+    public void testGetByTid() {
+        Tournament tournament = new Tournament();
+        tournament.setTid(10);
 
-        List<Tournament> tournaments = tournamentService.getByStatus("UPCOMING");
+        when(tournamentRepository.findByTid(10)).thenReturn(tournament);
 
-        assertEquals(1, tournaments.size());
-        assertEquals(Status.UPCOMING, tournaments.get(0).getStatus());
-        verify(tournamentRepository, times(1)).findAllByStatus(Status.UPCOMING);
+        Tournament result = tournamentService.getByTid(10);
+
+        assertNotNull(result);
+        assertEquals(10, result.getTid());
+    }
+
+    @Test
+    public void testUpdate_Success() {
+        Tournament tournamentDetails = new Tournament();
+        tournamentDetails.setTid(10);
+        tournamentDetails.setUid(1);
+        tournamentDetails.setTournamentName("Updated Tournament");
+        tournamentDetails.setStartDate(LocalDateTime.now().minusDays(10));
+        tournamentDetails.setEndDate(LocalDateTime.now().plusDays(10));
+        tournamentDetails.setStatus(Status.UPCOMING);
+
+        Tournament existingTournament = new Tournament();
+        existingTournament.setTid(10);
+        existingTournament.setUid(1);
+
+        when(tournamentRepository.findByTid(10)).thenReturn(existingTournament);
+        when(tournamentRepository.save(existingTournament)).thenReturn(tournamentDetails);
+
+        Tournament updatedTournament = tournamentService.update(tournamentDetails, 1);
+
+        assertNotNull(updatedTournament);
+        assertEquals("Updated Tournament", updatedTournament.getTournamentName());
+    }
+
+    @Test
+    public void testUpdate_Failure_IdMismatch() {
+        Tournament tournamentDetails = new Tournament();
+        tournamentDetails.setTid(10);
+        tournamentDetails.setUid(2);
+
+        Tournament existingTournament = new Tournament();
+        existingTournament.setTid(10);
+        existingTournament.setUid(1);
+
+        when(tournamentRepository.findByTid(10)).thenReturn(existingTournament);
+
+        Tournament updatedTournament = tournamentService.update(tournamentDetails, 1);
+
+        assertNull(updatedTournament);
+    }
+
+    @Test
+    public void testDelete() {
+        Integer id = 1;
+
+        doNothing().when(tournamentRepository).deleteById(id);
+
+        tournamentService.delete(id);
+
+        verify(tournamentRepository, times(1)).deleteById(id);
+    }
+
+    @Test
+    public void testGetByStatus() {
+        Status status = Status.LIVE;
+        Tournament tournament1 = new Tournament();
+        Tournament tournament2 = new Tournament();
+        List<Tournament> tournaments = Arrays.asList(tournament1, tournament2);
+
+        when(tournamentRepository.findAllByStatus(status)).thenReturn(tournaments);
+
+        List<Tournament> result = tournamentService.getByStatus("LIVE");
+
+        assertNotNull(result);
+        assertEquals(2, result.size());
+    }
+
+    @Test
+    public void testStart_Success() {
+        Tournament tournament = new Tournament();
+        tournament.setTid(10);
+        tournament.setUid(1);
+        tournament.setStartDate(LocalDateTime.now().toLocalDate().atStartOfDay());
+        tournament.setStatus(Status.UPCOMING);
+
+        when(tournamentRepository.findByTid(10)).thenReturn(tournament);
+
+        boolean started = tournamentService.start(10, 1);
+
+        assertTrue(started);
+        assertEquals(Status.LIVE, tournament.getStatus());
+        verify(tournamentRepository).save(tournament);
+    }
+
+    @Test
+    public void testStart_Failure() {
+        Tournament tournament = new Tournament();
+        tournament.setTid(10);
+        tournament.setUid(2);
+        tournament.setStartDate(LocalDateTime.now().toLocalDate().atStartOfDay().minusDays(1));
+        tournament.setStatus(Status.UPCOMING);
+
+        when(tournamentRepository.findByTid(10)).thenReturn(tournament);
+
+        boolean started = tournamentService.start(10, 1);
+
+        assertFalse(started);
+        assertEquals(Status.UPCOMING, tournament.getStatus());
+        verify(tournamentRepository, never()).save(tournament);
     }
 }
-
-
-
-
-
-

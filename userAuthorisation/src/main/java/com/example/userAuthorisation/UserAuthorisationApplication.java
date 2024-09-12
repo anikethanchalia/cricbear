@@ -16,7 +16,6 @@ import java.util.Optional;
 
 
 @SpringBootApplication
-@EnableDiscoveryClient
 public class UserAuthorisationApplication {
 
 	public static void main(String[] args) {

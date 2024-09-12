@@ -57,5 +57,12 @@ public class PlayerTeam {
 //        this.overs = overs;
 //        this.runsGiven = runsGiven;
 //    }
+    public PlayerTeam(int runsScored, int balls,int wickets,double overs,int runsGiven){
+        this.runsScored = runsScored;
+        this.balls = balls;
+        this.wickets = wickets;
+        this.overs = overs;
+        this.runsGiven = runsGiven;
+    }
 
 }

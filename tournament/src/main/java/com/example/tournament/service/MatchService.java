@@ -125,7 +125,7 @@ public class MatchService {
         return matches;
     }
 
-    public ArrayList<Match> scheduleSemiFinal(Integer tid,int uid) {
+    public ArrayList<Match> scheduleSemiFinal(Integer tid,Integer uid) {
         Tournament t = tournamentService.getByTid(tid);
         if(t.getUid()!=uid)
             return null;

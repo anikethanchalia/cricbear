@@ -39,9 +39,12 @@ public class BallByBallService {
     @Autowired
     private MatchResultService matchResultService;
 
+    @Autowired
+    BattingScoreService battingScoreService;
 
-    private Thread taskThread;
-    private static ArrayList<Object> possibleOutcomes = new ArrayList<>(Arrays.asList(0, 1, 2, 3, 4, 5, 6, "W", Extra.WIDE, Extra.NOBALL));
+
+    public Thread taskThread;
+    public static ArrayList<Object> possibleOutcomes = new ArrayList<>(Arrays.asList(0, 1, 2, 3, 4, 5, 6, "W", Extra.WIDE, Extra.NOBALL));
     private static final Random RANDOM = new Random();
     private static final long DELAY = 1000;
     public static boolean enabled = false;
@@ -62,6 +65,17 @@ public class BallByBallService {
     public static Wicket wicket;
     public static boolean isNoBall;
 
+    @Autowired
+    private BowlingScoreService bowlingScoreService;
+
+
+    public void createBattingScorecard(List<String> playing11Team){
+        battingScoreService.create(playing11Team,iid);
+    }
+
+    public void createBowlingScorecard(List<String> bowlerTeam){
+        bowlingScoreService.create(bowlerTeam,iid);
+    }
 
     public static void setStaticValues() {
         target = runs;
@@ -75,7 +89,7 @@ public class BallByBallService {
         batter++;
         BallByBallService.batsman2Id = playing11.get(batter);
         batter++;
-        bowler = bowler2;
+        bowler = bowler1;
         BallByBallService.bowlerid = bowler.get(RANDOM.nextInt(bowler.size()));
         bowler.remove(bowlerid);
     }
@@ -97,6 +111,7 @@ public class BallByBallService {
             isNoBall = true;
         }
         runs++;
+        bowlingScoreService.update(new BowlingScore(bowlerid, 1L,ballByBallRepository.countByBowlerId(bowlerid,iid),0,iid),iid);
         ballByBallRepository.save(new BallByBall(iid, overs, ballNumber, batsman1Id, batsman2Id, bowlerid, null, Extra.valueOf(value.toString()), null, runs, wickets));
     }
 
@@ -105,8 +120,15 @@ public class BallByBallService {
             wickets++;
             wicket = getRandomEnum(Wicket.class);
             ballNumber++;
+            bowlingScoreService.update(new BowlingScore(bowlerid, 0L,ballByBallRepository.countByBowlerId(bowlerid,iid),1,iid),iid);
+            bowlingScoreService.updatePlayerStatsForBowling(new BowlingScore(bowlerid, 0L,ballByBallRepository.countByBowlerId(bowlerid,iid),1,iid));
+            battingScoreService.update(new BattingScore(batsman1Id, 0L,1,true,iid),iid);
+            battingScoreService.updatePlayerStatsForBatting(battingScoreService.findByName(batsman1Id));
             ballByBallRepository.save(new BallByBall(iid, overs, ballNumber, batsman1Id, batsman2Id, bowlerid, null, null, wicket, runs, wickets));
             if (wickets == 10) {
+                bowlingScoreService.updatePlayerStatsForBowling(bowlingScoreService.findByName(bowlerid));
+                battingScoreService.updatePlayerStatsForBatting(battingScoreService.findByName(batsman1Id));
+                battingScoreService.updatePlayerStatsForBatting(battingScoreService.findByName(batsman2Id));
                 return;
             } else {
                 batsman1Id = playing11.get(batter);
@@ -124,6 +146,9 @@ public class BallByBallService {
         runs += (Integer) value;
         isNoBall = false;
         ballNumber++;
+        bowlingScoreService.update(new BowlingScore(bowlerid, value.longValue(), ballByBallRepository.countByBowlerId(bowlerid,iid),0,iid),iid);
+        bowlingScoreService.updatePlayerStatsForBowling(new BowlingScore(bowlerid, value.longValue(),ballByBallRepository.countByBowlerId(bowlerid,iid),0,iid));
+        battingScoreService.update(new BattingScore(batsman1Id, value.longValue(), 1,false,iid),iid);
         ballByBallRepository.save(new BallByBall(iid, overs, ballNumber, batsman1Id, batsman2Id, bowlerid, integer, null, null, runs, wickets));
         if (integer % 2 != 0) {
             swap();
@@ -148,7 +173,6 @@ public class BallByBallService {
     }
 
     public void afterFirstInnings(){
-        System.out.println("In Else");
         double overToSave = Double.parseDouble(overs+"."+ballNumber);
         Innings innings = new Innings(iid,MID,BATTING_ID,BOWLING_ID, runs, wickets, overToSave);
         inningsRepository.save(innings);
@@ -196,6 +220,8 @@ public class BallByBallService {
 
     public void startTask1() {
         if (taskThread == null || !taskThread.isAlive()) {
+            createBattingScorecard(playing11Team1);
+            createBowlingScorecard(bowler);
             taskThread = new Thread(() -> {
                 while (enabled) {
                     try {
@@ -288,6 +314,8 @@ public class BallByBallService {
         }
 
     public void startTask2() {
+        createBattingScorecard(playing11Team2);
+        createBowlingScorecard(bowler);
         new Thread(() -> {
             while (enabled2) {
                 try {

@@ -43,4 +43,8 @@ public class PlayerService {
         return "Player deleted";
     }
 
+    public Integer getPlayerByName(String name) {
+        return playerRepository.findByName(name).getPid();
+    }
+
 }

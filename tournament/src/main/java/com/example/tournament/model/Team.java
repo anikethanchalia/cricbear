@@ -56,4 +56,6 @@ public class Team {
         this.nrr = nrr;
     }
 
+    public Team(String teamA) {
+    }
 }

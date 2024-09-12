@@ -26,7 +26,7 @@ public class PlayerTeamController {
         if (playerTeams != null && !playerTeams.isEmpty()) {
             return new ResponseEntity<>(playerTeams, HttpStatus.OK);
         } else {
-            return new ResponseEntity<>(null,HttpStatus.NO_CONTENT);
+            return new ResponseEntity<>(null, HttpStatus.NO_CONTENT);
         }
     }
 
@@ -42,35 +42,34 @@ public class PlayerTeamController {
     @PostMapping("/addPlayerTeam")
     public ResponseEntity<List<PlayerTeam>> addPlayerTeam(@RequestBody List<PlayerTeam> playerTeam) {
         if (playerTeam == null) {
-            return new ResponseEntity<>(null,HttpStatus.BAD_REQUEST);
+            return new ResponseEntity<>(null, HttpStatus.BAD_REQUEST);
         }
         List<PlayerTeam> savedPlayerTeam = playerTeamService.savePlayerstoTeam(playerTeam);
         if (savedPlayerTeam != null) {
             return new ResponseEntity<>(savedPlayerTeam, HttpStatus.CREATED);
         } else {
-            return new ResponseEntity<>(null,HttpStatus.INTERNAL_SERVER_ERROR);
+            return new ResponseEntity<>(null, HttpStatus.INTERNAL_SERVER_ERROR);
         }
     }
 
     // Update an existing player team by ID
-    @PutMapping("/{tpid}")
-    public ResponseEntity<PlayerTeam> updatePlayerTeam(@PathVariable int tpid, @RequestBody PlayerTeam updatedPlayerTeam) {
-        PlayerTeam updated = playerTeamService.updatePlayerTeam(tpid, updatedPlayerTeam);
-        if (updated != null) {
-            return new ResponseEntity<>(updated, HttpStatus.OK);
-        } else {
-            return new ResponseEntity<>(null,HttpStatus.NOT_FOUND);
-        }
-    }
+//    @PutMapping("/{tpid}")
+//    public ResponseEntity<PlayerTeam> updatePlayerTeam(@PathVariable int tpid, @RequestBody PlayerTeam updatedPlayerTeam) {
+//        PlayerTeam updated = playerTeamService.updatePlayerTeam(tpid, updatedPlayerTeam);
+//        if (updated != null) {
+//            return new ResponseEntity<>(updated, HttpStatus.OK);
+//        } else {
+//            return new ResponseEntity<>(null,HttpStatus.NOT_FOUND);
+//        }
+//    }
 
     // Delete a player team by ID
     @DeleteMapping("/delete/{pid}")
     public ResponseEntity<String> deletePlayerTeam(@PathVariable int pid) {
-        int isDeleted= playerTeamService.deletePlayerTeam(pid);
-        if(isDeleted==1) {
+        int isDeleted = playerTeamService.deletePlayerTeam(pid);
+        if (isDeleted == 1) {
             return new ResponseEntity<>("Deleted", HttpStatus.NO_CONTENT);
-        }
-        else {
+        } else {
             return new ResponseEntity<>(null, HttpStatus.NOT_FOUND);
         }
     }
@@ -89,7 +88,7 @@ public class PlayerTeamController {
         if (playerTeams != null && !playerTeams.isEmpty()) {
             return new ResponseEntity<>(playerTeams, HttpStatus.OK);
         } else {
-            return new ResponseEntity<>(null,HttpStatus.NO_CONTENT);
+            return new ResponseEntity<>(null, HttpStatus.NO_CONTENT);
         }
     }
 }

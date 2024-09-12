@@ -45,9 +45,9 @@ public class UserController {
 
     // Login user
     @PostMapping("/login")
-    public ResponseEntity<User> loginUser(@RequestBody Map<String, String> user) {
-        String username = user.get("username");
-        String password = user.get("password");
+    public ResponseEntity<User> loginUser(@RequestBody Map<String, String> credentials) {
+        String username = credentials.get("username");
+        String password = credentials.get("password");
         boolean isAuthenticated = userService.authenticateUser(username, password);
         if (isAuthenticated) {
             User user1 = userService.getByUsername(username);
@@ -63,8 +63,8 @@ public class UserController {
 
     // Get user role by username
     @PostMapping("/getRole")
-    public ResponseEntity<Role> getUserRole(@RequestBody Map<String, String> user) {
-        String username = user.get("username");
+    public ResponseEntity<Role> getUserRole(@RequestBody Map<String, String> userInfo) {
+        String username = userInfo.get("username");
         Role role = userService.getUserRole(username);
         if (role != null) {
             return ResponseEntity.ok(role);
@@ -75,8 +75,8 @@ public class UserController {
 
     // Set user role
     @PutMapping("/setUserRole/{uid}")
-    public ResponseEntity<String> setUserRole(@PathVariable Integer uid, @RequestBody Map<String,Role> role) {
-        boolean isUpdated = userService.setUserRole(uid, role.get("role"));
+    public ResponseEntity<String> setUserRole(@PathVariable Integer uid, @RequestBody Map<String,Role> roleMap) {
+        boolean isUpdated = userService.setUserRole(uid, roleMap.get("role"));
         if (isUpdated) {
             return new ResponseEntity<>("Role updated successfully", HttpStatus.OK);
         } else {
@@ -84,6 +84,7 @@ public class UserController {
         }
     }
 
+    // Retrieve a user by their uid
     @GetMapping("/{uid}")
     public ResponseEntity<User> getUser(@PathVariable int uid) {
         User user = userService.getByUid(uid);

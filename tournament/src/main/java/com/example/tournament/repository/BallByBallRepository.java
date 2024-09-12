@@ -11,7 +11,7 @@ import java.util.List;
 @Repository
 public interface BallByBallRepository extends JpaRepository<BallByBall, Integer> {
     @Query("SELECT count(distinct(bb.overNumber)) from BallByBall bb where bb.bowler = :bowlerId and bb.iid = :iid")
-    public int countByBowlerId(@Param("bowlerId") String bowlerId, @Param("iid") int iit);
+    public int countByBowlerId(@Param("bowlerId") String bowlerId, @Param("iid") int iid);
 
     List<BallByBall> findByIid(int iid);
 }

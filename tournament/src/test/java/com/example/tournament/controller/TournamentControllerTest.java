@@ -1,121 +1,198 @@
 package com.example.tournament.controller;
 
+import com.example.tournament.model.Match;
 import com.example.tournament.model.Status;
 import com.example.tournament.model.Tournament;
+import com.example.tournament.service.MatchService;
 import com.example.tournament.service.TournamentService;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
-import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
-import org.springframework.http.MediaType;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
+import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
+import org.springframework.test.web.servlet.result.MockMvcResultMatchers;
 
-import java.sql.Date;
-import java.util.Arrays;
+import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.when;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
+import static org.mockito.Mockito.*;
+import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
 
-@WebMvcTest(TournamentController.class)
-class TournamentControllerTest {
+public class TournamentControllerTest {
+
+    private MockMvc mockMvc;
 
     @Mock
     private TournamentService tournamentService;
 
+    @Mock
+    private MatchService matchService;
+
     @InjectMocks
     private TournamentController tournamentController;
 
-    private MockMvc mockMvc;
-
-    private Tournament tournament;
-
-//    @BeforeEach
-//    void setUp() {
-//        MockitoAnnotations.openMocks(this);
-//        mockMvc = MockMvcBuilders.standaloneSetup(tournamentController).build();
-//
-//        tournament = new Tournament();
-//        tournament.setTid(1);
-//        tournament.setTName("Champions Trophy");
-//        tournament.setStartDate(Date.valueOf("2024-09-01"));
-//        tournament.setEndDate(Date.valueOf("2024-09-10"));
-//        tournament.setStatus(Status.UPCOMING);
-//    }
+    @BeforeEach
+    public void setUp() {
+        MockitoAnnotations.openMocks(this);
+        mockMvc = MockMvcBuilders.standaloneSetup(tournamentController).build();
+    }
 
     @Test
-    void create_ShouldReturnCreatedTournament() throws Exception {
+    public void testCreate() throws Exception {
+        Tournament tournament = new Tournament();
+        tournament.setTournamentName("Test Tournament");
+
         when(tournamentService.create(any(Tournament.class))).thenReturn(tournament);
 
-        mockMvc.perform(post("/tournament/create")
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(new ObjectMapper().writeValueAsString(tournament)))
-                .andExpect(status().isOk())
-                .andExpect(jsonPath("$.tName").value("Champions Trophy"))
-                .andExpect(jsonPath("$.status").value("UPCOMING"));
+        mockMvc.perform(MockMvcRequestBuilders.post("/tournament/create")
+                        .contentType("application/json")
+                        .content("{\"tournamentName\":\"Test Tournament\"}"))
+                .andExpect(MockMvcResultMatchers.status().isOk())
+                .andExpect(MockMvcResultMatchers.jsonPath("$.tournamentName").value("Test Tournament"))
+                .andDo(print());
     }
 
     @Test
-    void update_ShouldReturnUpdatedTournament() throws Exception {
-//        when(tournamentService.update(any(Tournament.class))).thenReturn(tournament);
+    public void testUpdate_Success() throws Exception {
+        Tournament tournament = new Tournament();
+        tournament.setTid(1);
+        tournament.setTournamentName("Updated Tournament");
 
-        mockMvc.perform(put("/tournament/update")
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(new ObjectMapper().writeValueAsString(tournament)))
-                .andExpect(status().isOk())
-                .andExpect(jsonPath("$.tName").value("Champions Trophy"))
-                .andExpect(jsonPath("$.status").value("UPCOMING"));
+        when(tournamentService.update(any(Tournament.class), anyInt())).thenReturn(tournament);
+
+        mockMvc.perform(MockMvcRequestBuilders.put("/tournament/update/1")
+                        .contentType("application/json")
+                        .content("{\"tid\":1,\"tournamentName\":\"Updated Tournament\"}"))
+                .andExpect(MockMvcResultMatchers.status().isOk())
+                .andExpect(MockMvcResultMatchers.jsonPath("$.tournamentName").value("Updated Tournament"))
+                .andDo(print());
     }
 
     @Test
-    void getById_ShouldReturnTournament() throws Exception {
+    public void testUpdate_Failure() throws Exception {
+        when(tournamentService.update(any(Tournament.class), anyInt())).thenReturn(null);
+
+        mockMvc.perform(MockMvcRequestBuilders.put("/tournament/update/1")
+                        .contentType("application/json")
+                        .content("{\"tid\":1,\"tournamentName\":\"Non-existent Tournament\"}"))
+                .andExpect(MockMvcResultMatchers.status().isNotFound())
+                .andDo(print());
+    }
+
+    @Test
+    public void testGetById() throws Exception {
+        Tournament tournament = new Tournament();
+        tournament.setTid(1);
+
         when(tournamentService.getById(1)).thenReturn(tournament);
 
-        mockMvc.perform(get("/tournament/getById/1")
-                        .contentType(MediaType.APPLICATION_JSON))
-                .andExpect(status().isOk())
-                .andExpect(jsonPath("$.tName").value("Champions Trophy"))
-                .andExpect(jsonPath("$.status").value("UPCOMING"));
+        mockMvc.perform(MockMvcRequestBuilders.get("/tournament/getById/1"))
+                .andExpect(MockMvcResultMatchers.status().isOk())
+                .andExpect(MockMvcResultMatchers.jsonPath("$.tid").value(1))
+                .andDo(print());
     }
 
     @Test
-    void getAll_ShouldReturnAllTournaments() throws Exception {
-        List<Tournament> tournaments = Arrays.asList(tournament);
+    public void testGetById_NotFound() throws Exception {
+        when(tournamentService.getById(1)).thenReturn(null);
+
+        mockMvc.perform(MockMvcRequestBuilders.get("/tournament/getById/1"))
+                .andExpect(MockMvcResultMatchers.status().isNotFound())
+                .andDo(print());
+    }
+
+    @Test
+    public void testGetAll() throws Exception {
+        List<Tournament> tournaments = new ArrayList<>();
+        Tournament tournament1 = new Tournament();
+        Tournament tournament2 = new Tournament();
+        tournaments.add(tournament1);
+        tournaments.add(tournament2);
+
         when(tournamentService.getAll()).thenReturn(tournaments);
 
-        mockMvc.perform(get("/tournament/getAll")
-                        .contentType(MediaType.APPLICATION_JSON))
-                .andExpect(status().isOk())
-                .andExpect(jsonPath("$.length()").value(1))
-                .andExpect(jsonPath("$[0].tName").value("Champions Trophy"));
+        mockMvc.perform(MockMvcRequestBuilders.get("/tournament/getAll"))
+                .andExpect(MockMvcResultMatchers.status().isOk())
+                .andExpect(MockMvcResultMatchers.jsonPath("$[0]").isNotEmpty())
+                .andExpect(MockMvcResultMatchers.jsonPath("$[1]").isNotEmpty())
+                .andDo(print());
     }
 
     @Test
-    void delete_ShouldReturnSuccessMessage() throws Exception {
-        mockMvc.perform(delete("/tournament/delete/1")
-                        .contentType(MediaType.APPLICATION_JSON))
-                .andExpect(status().isOk())
-                .andExpect(content().string("Deleted Successfully"));
+    public void testDelete() throws Exception {
+        mockMvc.perform(MockMvcRequestBuilders.delete("/tournament/delete/1"))
+                .andExpect(MockMvcResultMatchers.status().isOk())
+                .andExpect(MockMvcResultMatchers.content().string("Deleted Successfully"))
+                .andDo(print());
+
+        verify(tournamentService, times(1)).delete(1);
     }
 
     @Test
-    void getByStatus_ShouldReturnTournamentsWithStatus() throws Exception {
-        List<Tournament> tournaments = Arrays.asList(tournament);
-        when(tournamentService.getByStatus("UPCOMING")).thenReturn(tournaments);
+    public void testGetByStatus() throws Exception {
+        List<Tournament> tournaments = new ArrayList<>();
+        Tournament tournament1 = new Tournament();
+        Tournament tournament2 = new Tournament();
+        tournaments.add(tournament1);
+        tournaments.add(tournament2);
 
-        mockMvc.perform(post("/tournament/getByStatus")
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(new ObjectMapper().writeValueAsString(Map.of("status", "UPCOMING"))))
-                .andExpect(status().isOk())
-                .andExpect(jsonPath("$.length()").value(1))
-                .andExpect(jsonPath("$[0].tName").value("Champions Trophy"))
-                .andExpect(jsonPath("$[0].status").value("UPCOMING"));
+        when(tournamentService.getByStatus("LIVE")).thenReturn(tournaments);
+
+        Map<String, String> status = new HashMap<>();
+        status.put("status", "LIVE");
+
+        mockMvc.perform(MockMvcRequestBuilders.post("/tournament/getByStatus")
+                        .contentType("application/json")
+                        .content("{\"status\":\"LIVE\"}"))
+                .andExpect(MockMvcResultMatchers.status().isOk())
+                .andExpect(MockMvcResultMatchers.jsonPath("$[0]").isNotEmpty())
+                .andExpect(MockMvcResultMatchers.jsonPath("$[1]").isNotEmpty())
+                .andDo(print());
+    }
+
+
+    @Test
+    public void testStart_Failure() throws Exception {
+        when(tournamentService.start(1, 1)).thenReturn(false);
+
+        Map<String, Integer> request = new HashMap<>();
+        request.put("tid", 1);
+        request.put("uid", 1);
+
+        mockMvc.perform(MockMvcRequestBuilders.post("/tournament/start")
+                        .contentType("application/json")
+                        .content("{\"tid\":1,\"uid\":1}"))
+                .andExpect(MockMvcResultMatchers.status().isNotFound())
+                .andDo(print());
+    }
+
+    @Test
+    public void testGetByTid() throws Exception {
+        Tournament tournament = new Tournament();
+        tournament.setTid(10);
+
+        when(tournamentService.getByTid(10)).thenReturn(tournament);
+
+        mockMvc.perform(MockMvcRequestBuilders.get("/tournament/getByTid/10"))
+                .andExpect(MockMvcResultMatchers.status().isOk())
+                .andExpect(MockMvcResultMatchers.jsonPath("$.tid").value(10))
+                .andDo(print());
+    }
+
+    @Test
+    public void testGetByTid_NotFound() throws Exception {
+        when(tournamentService.getByTid(10)).thenReturn(null);
+
+        mockMvc.perform(MockMvcRequestBuilders.get("/tournament/getByTid/10"))
+                .andExpect(MockMvcResultMatchers.status().isNotFound())
+                .andDo(print());
     }
 }

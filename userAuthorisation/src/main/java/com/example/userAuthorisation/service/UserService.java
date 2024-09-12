@@ -17,6 +17,7 @@ public class UserService {
     @Autowired
     private PasswordEncoder passwordEncoder;
 
+    // Register a new user if the username is not already taken
     public User registerUser(User user) {
         if(userRepository.findByUsername(user.getUsername()) != null) {
             return null;
@@ -24,10 +25,13 @@ public class UserService {
         user.setPassword(passwordEncoder.encode(user.getPassword()));
         return userRepository.save(user);
     }
+
+    // Retrieve all users from the repository
     public List<User> getAllUsers() {
         return userRepository.findAll();
     }
 
+    // Authenticate a user based on username and password
     public boolean authenticateUser(String username, String password) {
         User user = userRepository.findByUsername(username);
         if (user != null) {
@@ -35,6 +39,8 @@ public class UserService {
         }
         return false;
     }
+
+    // Get the role of a user by their username
     public Role getUserRole(String username) {
         User user = userRepository.findByUsername(username);
         if (user != null) {
@@ -43,6 +49,7 @@ public class UserService {
         return null;
     }
 
+    // Set the role for a user identified by their UID
     public Boolean setUserRole(int uid, Role role) {
         User user = userRepository.findByUid(uid);
         user.setRole(role);
@@ -50,9 +57,12 @@ public class UserService {
         return true;
     }
 
+    // Get a user by their UID
     public User getByUid(int uid) {
         return userRepository.findByUid(uid);
     }
+
+    // Get a user by their username
     public User getByUsername(String username) {
         return userRepository.findByUsername(username);
     }
