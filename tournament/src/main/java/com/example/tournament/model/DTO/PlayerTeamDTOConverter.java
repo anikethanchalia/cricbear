@@ -15,8 +15,13 @@ public class PlayerTeamDTOConverter {
         String name = (String) row[3];
         boolean overseas = (Boolean) row[4];
         PlayerRole playerRole = (PlayerRole) row[5];
+        int runsScored = (Integer) row[6];
+        int balls = (Integer) row[7];
+        int wickets = (Integer) row[8];
+        double overs = (Double) row[9];
+        int runsGiven = (Integer) row[10];
 
-        return new PlayerTeamDTO(teamId, pid, teamName, name, overseas, playerRole);
+        return new PlayerTeamDTO(teamId, pid, teamName, name, overseas, playerRole,runsScored,balls,wickets,overs,runsGiven);
     }
 }
 

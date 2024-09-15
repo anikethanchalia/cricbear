@@ -20,18 +20,19 @@ import static com.example.tournament.service.BallByBallService.*;
 @Service
 public class InningsService {
 
-    public static int TOSS_WIN_TEAM;
-    public static int BATTING_ID;
-    public static int BOWLING_ID;
-//    public static int TOSS_DESICION;
+    //static variables that can be used in the ballbyball service as well.
+    protected static int tossWinTeam;
+    public static int battingId;
+    public static int bowlingId;
     public static TossDecision tossDecision;
     public static List<String> playing11Team1 = new ArrayList<>();
-    public static List<String> bowler1;
+    public static List<String> bowlersTeam1;
     public static List<String> playing11Team2 = new ArrayList<>();
-    public static List<String> bowler2;
-    public static List<String> batsmen1;
-    public static List<String> batsmen2;
-    public static int MID;
+    public static List<String> bowlersTeam2;
+    public static List<String> batsmenTeam1;
+    public static List<String> batsmenTeam2;
+    protected static int matchId;
+
     private static final Random RANDOM = new Random();
 
 
@@ -45,120 +46,160 @@ public class InningsService {
     @Autowired
     private BallByBallService ballByBallService;
 
+    //initializes all static lists to new.
     public static void setToNew() {
         playing11Team1 = new ArrayList<>();
-        bowler1 = new ArrayList<>();
+        bowlersTeam1 = new ArrayList<>();
         playing11Team2 = new ArrayList<>();
-        bowler2 = new ArrayList<>();
-        batsmen1 = new ArrayList<>();
-        batsmen2 = new ArrayList<>();
+        bowlersTeam2 = new ArrayList<>();
+        batsmenTeam1 = new ArrayList<>();
+        batsmenTeam2 = new ArrayList<>();
     }
 
-    public Innings create(Innings innings) {
+
+    //Create a new innings.
+    public Innings createInnings(Innings innings) {
         return inningsRepository.save(innings);
     }
 
+    //Get all innings from the table.
     public List<Innings> getAll() {
         return inningsRepository.findAll();
     }
 
+    //Get innings by match id. Each match has atmost 2 innings.
     public List<Innings> getById(Integer mid) {
         return inningsRepository.findByMid(mid);
     }
 
-    public void delete(Integer iid) {
-        inningsRepository.deleteById(iid);
-    }
 
-    public Innings update(Innings innings) {
-        return inningsRepository.save(innings);
-    }
-
+    //Get a random value from an enum.
     public static <T extends Enum<T>> T getRandomEnum(Class<T> clazz) {
         List<T> enumValues = Arrays.asList(clazz.getEnumConstants());
         int randomIndex = RANDOM.nextInt(enumValues.size());
         return enumValues.get(randomIndex);
     }
 
-    public void startMatch(Integer mid) throws InterruptedException {
-        MID = mid;
-        Match match = matchRepository.getByMid(mid);
-        TossDecision decision = getRandomEnum(TossDecision.class);
-//        Innings innings = new Innings();
-        System.out.println("Toss decision: " + decision);
-        if (decision == TossDecision.BAT) {
-            TOSS_WIN_TEAM = match.getTeamId1();
-            BATTING_ID = match.getTeamId1();
-            BOWLING_ID = match.getTeamId2();
-            tossDecision = decision;
-        }
-        else {
-            TOSS_WIN_TEAM = match.getTeamId2();
-            BATTING_ID = match.getTeamId1();
-            BOWLING_ID = match.getTeamId2();
-            tossDecision = decision;
-        }
-        Innings innings = new Innings(mid, BATTING_ID,BOWLING_ID);
-        inningsRepository.save(innings);
-        System.out.println(tossDecision+" "+BATTING_ID+" "+BOWLING_ID);
-        batsmen1 = playerTeamRepository.findByRoleAndTeam(BATTING_ID, String.valueOf(PlayerRole.BATSMAN),4);
-//        batsmen1.addAll(playerTeamRepository.findByRoleAndTeam(BATTING_ID, String.valueOf(PlayerRole.BATSMAN),));
-        List<String> allrounder1 = playerTeamRepository.findByRoleAndTeam(BATTING_ID, String.valueOf(PlayerRole.ALLROUNDER),1);
-        List<String> wk1 = playerTeamRepository.findByRoleAndTeam(BATTING_ID, String.valueOf(PlayerRole.WICKETKEEPER),1);
-        bowler1 = playerTeamRepository.findByRoleAndTeam(BATTING_ID, String.valueOf(PlayerRole.BOWLER),5);
-//        bowler1.addAll(playerTeamRepository.findByRoleAndTeam(BATTING_ID, String.valueOf(PlayerRole.BOWLER),4,false));
-        playing11Team1.addAll(batsmen1);
-        playing11Team1.addAll(allrounder1);
-        playing11Team1.addAll(wk1);
-        playing11Team1.addAll(bowler1);
-        bowler1.addAll(allrounder1);
-        System.out.println(playing11Team1);
-        batsmen2 = playerTeamRepository.findByRoleAndTeam(BOWLING_ID, String.valueOf(PlayerRole.BATSMAN),4);
-//        batsmen2.addAll(playerTeamRepository.findByRoleAndTeam(BOWLING_ID, String.valueOf(PlayerRole.BATSMAN),2,true));
-        List<String> allrounder2 = playerTeamRepository.findByRoleAndTeam(BOWLING_ID, String.valueOf(PlayerRole.ALLROUNDER),1);
-        List<String> wk2 = playerTeamRepository.findByRoleAndTeam(BOWLING_ID, String.valueOf(PlayerRole.WICKETKEEPER),1);
-        bowler2 = playerTeamRepository.findByRoleAndTeam(BOWLING_ID, String.valueOf(PlayerRole.BOWLER),5);
-//        bowler2.addAll(playerTeamRepository.findByRoleAndTeam(BOWLING_ID, String.valueOf(PlayerRole.BOWLER),4,false));
-        System.out.println(bowler2);
-        System.out.println(bowler1);
-        playing11Team2.addAll(batsmen2);
-        playing11Team2.addAll(allrounder2);
-        playing11Team2.addAll(wk2);
-        playing11Team2.addAll(bowler2);
-        bowler2.addAll(allrounder2);
-        System.out.println(playing11Team2);
-//        BallByBallService ballByBallService = new BallByBallService();
-        playing11= playing11Team1;
-        Innings inn = inningsRepository.getByMid(mid);
-        BallByBallService.iid= inn.getIid();
-        BallByBallService.bowler= bowler2;
-        runs=0;
-        BallByBallService.overs = 0;
-        BallByBallService.wickets = 0;
-        ballNumber = 0;
-        isNoBall = false;
-        target=Integer.MAX_VALUE;
-        batter = 0;
-        batsman1Id = playing11.get(batter);
-        batter++;
-        batsman2Id = playing11.get(batter);
-        batter++;
-        bowlerid = bowler.get(RANDOM.nextInt(bowler.size()));
-        bowler.remove(bowlerid);
-        enabled=true;
-
-        ballByBallService.startTask1();
-//        ballByBallService.startTask2();
-        System.out.println("Here");
+    //Set the batting team id, bowling team id and toss decision.
+    public void tossDecision(Integer battingTeamId, Integer bowlingTeamId,TossDecision tossDecisionByTeam) {
+        battingId = battingTeamId;
+        bowlingId = bowlingTeamId;
+        tossDecision = tossDecisionByTeam;
     }
 
+    //To create the playing 11 of the first team.
+    public void creationOfPlaying11Team1(){
+        int limit =4;
+        batsmenTeam1 = playerTeamRepository.findByRoleAndTeam(battingId, String.valueOf(PlayerRole.BATSMAN),limit);
+        limit =  4 - batsmenTeam1.size();
+        if(limit <=0)
+            limit=0;
+        List<String> allRounderTeam1 = playerTeamRepository.findByRoleAndTeam(battingId, String.valueOf(PlayerRole.ALLROUNDER),limit + 1);
+        limit = limit - allRounderTeam1.size();
+        if(limit<=0)
+            limit = 0;
+        List<String> wicketKeeperTeam1 = playerTeamRepository.findByRoleAndTeam(battingId, String.valueOf(PlayerRole.WICKETKEEPER),limit+1);
+        limit = limit - wicketKeeperTeam1.size();
+        if (limit <=0)
+            limit = 0;
+        bowlersTeam1 = playerTeamRepository.findByRoleAndTeam(battingId, String.valueOf(PlayerRole.BOWLER), 5);
+
+        playing11Team1.addAll(batsmenTeam1);
+        playing11Team1.addAll(allRounderTeam1);
+        playing11Team1.addAll(wicketKeeperTeam1);
+        playing11Team1.addAll(bowlersTeam1);
+        bowlersTeam1.addAll(allRounderTeam1);
+    }
+
+
+    //To create the playing 11 of the second team.
+    public void creationOfPlaying11Team2(){
+        int limit =4;
+        batsmenTeam2 = playerTeamRepository.findByRoleAndTeam(bowlingId, String.valueOf(PlayerRole.BATSMAN),limit);
+        limit = limit - batsmenTeam2.size();
+        if(limit<=0)
+            limit=0;
+        List<String> allrounderTeam2 = playerTeamRepository.findByRoleAndTeam(bowlingId, String.valueOf(PlayerRole.ALLROUNDER),limit+1);
+        limit = limit - allrounderTeam2.size();
+        if(limit<=0)
+            limit = 0;
+        List<String> wicketkeeperTeam2 = playerTeamRepository.findByRoleAndTeam(bowlingId, String.valueOf(PlayerRole.WICKETKEEPER),limit+1);
+        limit = limit - wicketkeeperTeam2.size();
+        if (limit <=0)
+            limit = 0;
+        bowlersTeam2 = playerTeamRepository.findByRoleAndTeam(bowlingId, String.valueOf(PlayerRole.BOWLER),limit+5);
+
+
+        playing11Team2.addAll(batsmenTeam2);
+        playing11Team2.addAll(allrounderTeam2);
+        playing11Team2.addAll(wicketkeeperTeam2);
+        playing11Team2.addAll(bowlersTeam2);
+        bowlersTeam2.addAll(allrounderTeam2);
+    }
+
+    //Initializes the state for ballByBall service class
+    public void initializeBallByBallState(int mid){
+        BallByBallService.playing11= playing11Team1;
+        Innings inn = inningsRepository.getByMid(mid);
+        BallByBallService.iid= inn.getIid();
+        BallByBallService.bowler= bowlersTeam2;
+        BallByBallService.runs=0;
+        BallByBallService.overs = 0;
+        BallByBallService.wickets = 0;
+        BallByBallService.ballNumber = 0;
+        BallByBallService.isNoBall = false;
+        BallByBallService.target=Integer.MAX_VALUE;
+        BallByBallService.batterScore = 0;
+        BallByBallService.batsman1Name = playing11.get(batterScore);
+        BallByBallService.batterScore++;
+        BallByBallService.batsman2Name = playing11.get(batterScore);
+        BallByBallService.batterScore++;
+        BallByBallService.bowlerName = bowler.get(RANDOM.nextInt(bowler.size()));
+        BallByBallService.bowler.remove(bowlerName);
+        BallByBallService.enabled=true;
+        ballByBallService.startTask1();
+    }
+
+/*
+ * Starts a cricket match by performing toss, setting up team configurations, and initializing values.
+ *
+ * This method performs the following actions:
+ * 1. Retrieves the match details using the provided match ID.
+ * 2. Randomly determines the toss decision and updates the toss-winning team accordingly.
+ * 3. Saves the innings information to the repository.
+ * 4. Sets up the playing 11 for both teams.
+ * 5. Initializes the ball-by-ball class values and starts the innings.
+ */
+ public void startMatchWithTossAndSetup(Integer mid) {
+        matchId = mid;
+        Match match = matchRepository.getByMid(mid);
+        TossDecision decision = getRandomEnum(TossDecision.class);
+        if (decision == TossDecision.BAT) {
+            tossWinTeam = match.getTeamId1();
+            tossDecision(match.getTeamId1(),match.getTeamId2(),decision);
+        }
+        else {
+            tossWinTeam = match.getTeamId2();
+            tossDecision(match.getTeamId1(),match.getTeamId2(),decision);
+        }
+        Innings innings = new Innings(mid, battingId, bowlingId);
+        inningsRepository.save(innings);
+
+        //Create the playing 11 of both teams.
+        creationOfPlaying11Team1();
+        creationOfPlaying11Team2();
+
+        //Setup the values and start the innings.
+        initializeBallByBallState(mid);
+
+    }
+
+    //update the innings with runs, wickets and overs
     public Innings update(int iid, int runs, int wickets, double overToSave) {
         Innings innings = inningsRepository.getByIid(iid);
-        System.out.println(innings);
         innings.setRuns(runs);
         innings.setWickets(wickets);
         innings.setOvers(overToSave);
-        System.out.println(innings);
         return inningsRepository.save(innings);
     }
 }

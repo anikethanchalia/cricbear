@@ -57,7 +57,7 @@ public class UserService {
         return true;
     }
 
-    // Get a user by their UID
+    // Get a user by the primary key
     public User getByUid(int uid) {
         return userRepository.findByUid(uid);
     }

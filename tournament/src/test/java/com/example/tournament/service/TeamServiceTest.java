@@ -10,14 +10,12 @@ import org.junit.jupiter.api.Test;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
-import org.springframework.test.util.ReflectionTestUtils;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.Mockito.*;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -39,27 +37,27 @@ public class TeamServiceTest {
     }
 
     @Test
-    public void testCreate_Success() {
+    public void testCreate_Team_Success() {
         Team team = new Team();
         team.setTeamName("Team A");
 
         when(teamRepository.findByTeamName(team.getTeamName())).thenReturn(null);
         when(teamRepository.save(team)).thenReturn(team);
 
-        Team result = teamService.create(team);
+        Team result = teamService.createTeam(team);
         assertNotNull(result);
         assertEquals(team.getTeamName(), result.getTeamName());
         verify(teamRepository).save(team);
     }
 
     @Test
-    public void testCreate_Failure() {
+    public void testCreate_Team_Failure() {
         Team team = new Team();
         team.setTeamName("Team A");
 
         when(teamRepository.findByTeamName(team.getTeamName())).thenReturn(team);
 
-        Team result = teamService.create(team);
+        Team result = teamService.createTeam(team);
         assertNull(result);
         verify(teamRepository, never()).save(any(Team.class));
     }
@@ -138,11 +136,11 @@ public class TeamServiceTest {
     @Test
     public void testUpdateAfterResults() {
         Team team = new Team();
-        team.setMatchesPlayed(10);
-        team.setMatchesWon(5);
-        team.setMatchesLost(3);
-        team.setMatchesDrawn(2);
-        team.setMatchesAbandoned(1);
+        team.setMatchesPlayed(10L);
+        team.setMatchesWon(5L);
+        team.setMatchesLost(3L);
+        team.setMatchesDrawn(2L);
+        team.setMatchesAbandoned(1L);
         team.setPoints(15);
         team.setNrr(0.5);
 

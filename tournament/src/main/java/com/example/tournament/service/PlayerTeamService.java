@@ -19,12 +19,7 @@ public class PlayerTeamService {
     @Autowired
     private PlayerTeamRepository playerTeamRepository;
 
-    private static final int MAX_PLAYERS = 15;
-    private static final int MAX_OVERSEAS_PLAYERS = 5;
-    private static final int MAX_BATSMEN = 6;
-    private static final int MAX_BOWLERS = 4;
-    private static final int MAX_ALLROUNDER = 4;
-    private static final int MAX_WICKETKEEPERS = 1;
+
     @Autowired
     private PlayerRepository playerRepository;
 
@@ -50,114 +45,42 @@ public class PlayerTeamService {
 
         return playerTeamDTOs;
     }
-    public List<PlayerTeam> savePlayerTeam(List<PlayerTeam> playerTeam) {
-        List<PlayerTeam> playerTeams = new ArrayList<>();
-        for (PlayerTeam playerTeamDTO1 : playerTeam) {
-            int teamId = playerTeamDTO1.getTeamId();
-            int pid = playerTeamDTO1.getPid();
-
-            PlayerRole playerRole = playerTeamDTO1.getPlayerRole();
-            boolean overseas = playerTeamDTO1.isOverseas();
-
-            // Check if playerRole is null
-            if (playerRole == null) {
-                throw new IllegalArgumentException("Player role cannot be null.");
-            }
-
-            // Retrieve existing player teams for the team
-            Long overseasCount = playerTeamRepository.countOverseasPlayers(teamId);
-//            long roleCount = playerTeamRepository.countPlayersByRole(teamId, playerRole);
-            List<PlayerTeam> existingPlayerTeams = playerTeamRepository.findByTeamId(teamId);
-
-            // Check if the player is already in the team
-            boolean playerExists = existingPlayerTeams.stream()
-                    .anyMatch(pt -> pt.getPid() == pid);
-
-            if (playerExists) {
-                throw new IllegalArgumentException("Player is already part of the team.");
-            }
-
-            // Check player count limit
-            if (existingPlayerTeams.size() >= MAX_PLAYERS) {
-                throw new IllegalArgumentException("Team already has the maximum number of players (15).");
-            }
-
-            // Validate overseas players
-            if (overseas && overseasCount >= MAX_OVERSEAS_PLAYERS) {
-                throw new IllegalArgumentException("Team already has the maximum number of overseas players (5).");
-            }
-
-            // Validate role count based on player role
-//            switch (playerRole) {
-//                case BATSMAN:
-//                    if (roleCount >= MAX_BATSMEN) {
-//                        throw new IllegalArgumentException("Team already has the maximum number of batsmen (6).");
-//                    }
-//                    break;
-//                case BOWLER:
-//                    if (roleCount >= MAX_BOWLERS) {
-//                        throw new IllegalArgumentException("Team already has the maximum number of bowlers (4).");
-//                    }
-//                    break;
-//                case ALLROUNDER:
-//                    if (roleCount >= MAX_ALLROUNDER) {
-//                        throw new IllegalArgumentException("Team already has the maximum number of all-rounders (3).");
-//                    }
-//                    break;
-//                case WICKETKEEPER:
-//                    if (roleCount >= MAX_WICKETKEEPERS) {
-//                        throw new IllegalArgumentException("Team already has the maximum number of wicketkeepers (2).");
-//                    }
-//                    break;
-//                default:
-//                    throw new IllegalArgumentException("Invalid player role.");
-//            }
-
-            // Convert DTO to entity
-            PlayerTeam playerTeam1 = new PlayerTeam();
-            playerTeam1.setTeamId(teamId);
-            playerTeam1.setPid(pid);
-            playerTeam1.setPlayerRole(playerRole);
-            playerTeam1.setOverseas(overseas);
-
-            // Save and return the entity
-            playerTeams.add(playerTeam1);
-            playerTeamRepository.save(playerTeam1);
-        }
-        return playerTeams;
-    }
 
 
+    //Save the list of players to a team if overseas < 5 and count < 15.
     public List<PlayerTeam> savePlayerstoTeam(List<PlayerTeam> playerTeam) {
         List<PlayerTeam> playerTeams = new ArrayList<>();
         for (PlayerTeam playerTeam1 : playerTeam) {
             int teamId = playerTeam1.getTeamId();
             Long count = playerTeamRepository.countByOverseas(teamId);
             if(count > 5)
-                return null;
+                return new ArrayList<>();
             int count1 = playerTeamRepository.countByTeamId(teamId);
             if(count1 > 15)
-                return null;
+                return new ArrayList<>();
             playerTeams.add(playerTeam1);
+            Player player = playerRepository.findById(playerTeam1.getPid()).get();
+            player.setFlag(true);
+            playerTeam1.setFlag(true);
+            playerRepository.save(player);
             playerTeamRepository.save(playerTeam1);
         }
         return playerTeams;
     }
 
-    // Update an existing player team
-    public PlayerTeam updatePlayerTeam(PlayerTeam updatedPlayer, int pid) {
+    // Update an existing player by adding the runs scored /given by him.
+    public PlayerTeam updatePlayerTeam(int runsScored,int ballsFaced,int wickets,int overs,int value,int pid) {
         PlayerTeam existingPlayerTeam = playerTeamRepository.findByPid(pid);
         Player existingPlayer = playerRepository.findByPid(pid);
         if (existingPlayer != null) {
 
             // Update player details
-            existingPlayerTeam.setRunsScored(updatedPlayer.getRunsScored()+ existingPlayerTeam.getRunsScored());
-            existingPlayerTeam.setBalls(updatedPlayer.getBalls()+ existingPlayerTeam.getBalls());
-            existingPlayerTeam.setWickets(updatedPlayer.getWickets()+ existingPlayerTeam.getWickets());
-            existingPlayerTeam.setOvers(updatedPlayer.getOvers()+ existingPlayerTeam.getOvers());
-            existingPlayerTeam.setRunsGiven(updatedPlayer.getRunsGiven()+ existingPlayerTeam.getRunsGiven());
+            existingPlayerTeam.setRunsScored(runsScored + existingPlayerTeam.getRunsScored());
+            existingPlayerTeam.setBalls(ballsFaced + existingPlayerTeam.getBalls());
+            existingPlayerTeam.setWickets(wickets + existingPlayerTeam.getWickets());
+            existingPlayerTeam.setOvers(overs + existingPlayerTeam.getOvers());
+            existingPlayerTeam.setRunsGiven(value + existingPlayerTeam.getRunsGiven());
 
-            // Save and return the updated entity
             return playerTeamRepository.save(existingPlayerTeam);
         } else {
             return null; // Handle case where the player team is not found
@@ -167,6 +90,8 @@ public class PlayerTeamService {
     // Delete a player team by ID
     @Transactional
     public int deletePlayerTeam(int pid) {
+        PlayerTeam player = playerTeamRepository.findById(pid).get();
+        player.setFlag(false);
         return playerTeamRepository.deleteByPid(pid);
     }
 

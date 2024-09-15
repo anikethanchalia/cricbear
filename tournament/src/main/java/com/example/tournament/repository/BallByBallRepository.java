@@ -10,8 +10,10 @@ import java.util.List;
 
 @Repository
 public interface BallByBallRepository extends JpaRepository<BallByBall, Integer> {
+    //Calculate overs bowled by a bowler in an innings.
     @Query("SELECT count(distinct(bb.overNumber)) from BallByBall bb where bb.bowler = :bowlerId and bb.iid = :iid")
-    public int countByBowlerId(@Param("bowlerId") String bowlerId, @Param("iid") int iid);
+    int countByBowlerId(@Param("bowlerId") String bowlerId, @Param("iid") int iid);
 
+    //Find all by innings id.
     List<BallByBall> findByIid(int iid);
 }

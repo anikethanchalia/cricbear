@@ -6,5 +6,6 @@ import org.springframework.stereotype.Repository;
 
 @Repository
 public interface MatchResultRepository extends JpaRepository<MatchResult, Integer> {
+    //Find match result by match id.
     MatchResult findByMid(Integer matchId);
 }

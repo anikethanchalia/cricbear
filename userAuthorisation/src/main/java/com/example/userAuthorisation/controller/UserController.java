@@ -84,7 +84,7 @@ public class UserController {
         }
     }
 
-    // Retrieve a user by their uid
+    // Retrieve a user by the uid
     @GetMapping("/{uid}")
     public ResponseEntity<User> getUser(@PathVariable int uid) {
         User user = userService.getByUid(uid);

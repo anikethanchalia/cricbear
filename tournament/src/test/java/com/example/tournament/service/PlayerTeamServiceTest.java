@@ -1,10 +1,10 @@
 package com.example.tournament.service;
 
 import com.example.tournament.model.DTO.PlayerTeamDTO;
-import com.example.tournament.model.PlayerRole;
+import com.example.tournament.model.Player;
 import com.example.tournament.model.PlayerTeam;
+import com.example.tournament.repository.PlayerRepository;
 import com.example.tournament.repository.PlayerTeamRepository;
-import com.example.tournament.service.PlayerTeamService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.InjectMocks;
@@ -13,6 +13,7 @@ import org.mockito.MockitoAnnotations;
 import org.springframework.boot.test.context.SpringBootTest;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
 
@@ -25,8 +26,12 @@ public class PlayerTeamServiceTest {
     @Mock
     private PlayerTeamRepository playerTeamRepository;
 
+    @Mock
+    private PlayerRepository playerRepository;
+
     @InjectMocks
     private PlayerTeamService playerTeamService;
+
 
     @BeforeEach
     public void setUp() {
@@ -82,42 +87,56 @@ public class PlayerTeamServiceTest {
     }
 
     @Test
-    public void testSavePlayerTeam() {
-        // Arrange
-        List<PlayerTeam> playerTeams = new ArrayList<>();
-        PlayerTeam playerTeam = new PlayerTeam();
-        playerTeam.setTeamId(1);
-        playerTeam.setPid(1);
-        playerTeam.setPlayerRole(PlayerRole.BATSMAN);
-        playerTeam.setOverseas(false);
-        playerTeams.add(playerTeam);
+    void savePlayerstoTeam_ShouldReturnSavedPlayersIfCountValid() {
+        PlayerTeam playerTeam1 = new PlayerTeam();
+        playerTeam1.setTeamId(1);
+        playerTeam1.setPid(1);
+        when(playerTeamRepository.countByOverseas(1)).thenReturn(3L);
+        when(playerTeamRepository.countByTeamId(1)).thenReturn(13);
+        when(playerTeamRepository.save(any(PlayerTeam.class))).thenReturn(playerTeam1);
+        when(playerRepository.findById(1)).thenReturn(Optional.of(new Player()));
 
-        when(playerTeamRepository.countOverseasPlayers(1)).thenReturn(0L);
-        when(playerTeamRepository.findByTeamId(1)).thenReturn(new ArrayList<>());
+        List<PlayerTeam> result = playerTeamService.savePlayerstoTeam(Arrays.asList(playerTeam1));
 
-        // Act
-        List<PlayerTeam> result = playerTeamService.savePlayerTeam(playerTeams);
-
-        // Assert
-        assertNotNull(result);
         assertEquals(1, result.size());
-        verify(playerTeamRepository, times(1)).save(playerTeam);
+        verify(playerTeamRepository, times(1)).save(playerTeam1);
+    }
+
+    @Test
+    void savePlayerstoTeam_ShouldReturnEmptyListIfOverseasLimitExceeded() {
+        PlayerTeam playerTeam1 = new PlayerTeam();
+        playerTeam1.setTeamId(1);
+        playerTeam1.setPid(1);
+        when(playerTeamRepository.countByOverseas(1)).thenReturn(6L);
+
+        List<PlayerTeam> result = playerTeamService.savePlayerstoTeam(Arrays.asList(playerTeam1));
+
+        assertTrue(result.isEmpty());
+        verify(playerTeamRepository, never()).save(any());
     }
 
 
 
     @Test
     public void testDeletePlayerTeam() {
-        // Arrange
-        int pid = 1;
-        when(playerTeamRepository.deleteByPid(pid)).thenReturn(1);
+        // Given
+        int playerId = 1;
+        PlayerTeam player = new PlayerTeam();
+        player.setPid(playerId);
+        player.setFlag(true);
 
-        // Act
-        int result = playerTeamService.deletePlayerTeam(pid);
+        when(playerTeamRepository.findById(playerId)).thenReturn(Optional.of(player));
+        when(playerTeamRepository.deleteByPid(playerId)).thenReturn(1);
 
-        // Assert
-        assertEquals(1, result);
-        verify(playerTeamRepository, times(1)).deleteByPid(pid);
+        // When
+        int result = playerTeamService.deletePlayerTeam(playerId);
+
+        // Then
+        verify(playerTeamRepository).findById(playerId);
+        verify(playerTeamRepository).deleteByPid(playerId);
+
+        assertFalse(player.isFlag(), "Player flag should be set to false");
+        assertEquals(1, result, "The result should be 1");
     }
 
     @Test

@@ -3,7 +3,6 @@ package com.example.tournament.service;
 import com.example.tournament.model.BattingScore;
 import com.example.tournament.model.Innings;
 import com.example.tournament.model.Player;
-import com.example.tournament.model.PlayerTeam;
 import com.example.tournament.repository.BattingScoreRepository;
 import com.example.tournament.repository.InningsRepository;
 import com.example.tournament.repository.PlayerRepository;
@@ -25,46 +24,52 @@ public class BattingScoreService {
     @Autowired
     private InningsRepository inningsRepository;
 
+    //Return all rows.
     public List<BattingScore> getAll() {
         return battingScoreRepository.findAll();
     }
 
+    //Create the rows for all players in a team.
     public boolean create(List<String> battingScore, Integer iid) {
         for (String bs : battingScore) {
-            battingScoreRepository.save(new BattingScore(bs, 0L,0,false,iid));
+            battingScoreRepository.save(new BattingScore(bs, 0L,0,0,0,false,iid));
         }
         return true;
     }
 
-    public void update(BattingScore battingScore, Integer iid) {
-        BattingScore existingBattingScore = battingScoreRepository.findByNameAndIid(battingScore.getPlayerName(),iid);
+    //Update the scores for a batsman.
+    public void update(String batsmanName, int runsScored, int ballsfaced, int fours, int six, boolean isOut, Integer iid) {
+        BattingScore existingBattingScore = battingScoreRepository.findByNameAndIid(batsmanName,iid);
         if (existingBattingScore!=null) {
-            battingScoreRepository.save(new BattingScore(existingBattingScore.getBsid(), battingScore.getPlayerName(), battingScore.getRunsScored()+ existingBattingScore.getRunsScored(),
-                    existingBattingScore.getBallsFaced()+ battingScore.getBallsFaced(),battingScore.getIsOut(),iid));
+            existingBattingScore.setRunsScored(existingBattingScore.getRunsScored()+runsScored);
+            existingBattingScore.setBallsFaced(existingBattingScore.getBallsFaced() + ballsfaced);
+            existingBattingScore.setFours(existingBattingScore.getFours() + fours);
+            existingBattingScore.setSix(existingBattingScore.getSix() + six);
+            existingBattingScore.setIsOut(isOut);
+            battingScoreRepository.save(existingBattingScore);
         }
     }
 
-    public BattingScore findByName(String playerName) {
-        return battingScoreRepository.findByPlayerName(playerName);
+
+    //Update the scores of a batsman.
+    public void updatePlayerStatsForBatting(String batsmanName, int runsScored, int ballsFaced, int wickets,int overs, int value) {
+        Player player = playerRepository.findByName(batsmanName);
+        playerTeamService.updatePlayerTeam(runsScored,ballsFaced,wickets,overs,value,player.getPid());
     }
 
-    public void updatePlayerStatsForBatting(BattingScore battingScore) {
-        Player player = playerRepository.findByName(battingScore.getPlayerName());
-        playerTeamService.updatePlayerTeam(new PlayerTeam(Math.toIntExact(battingScore.getRunsScored()), battingScore.getBallsFaced(),0,0,0),player.getPid());
-    }
-
-    public Map<Integer, List<BattingScore>> getAllDataByMid(int mid){
+    //get the results for both innings in a match.
+    public Map<String, List<BattingScore>> getAllDataByMid(int mid){
         List<Innings> innings = inningsRepository.findByMid(mid);
-        Map<Integer, List<BattingScore>> result = new HashMap<>();
-        if(innings.size()==0)
-            return null;
+        Map<String, List<BattingScore>> result = new HashMap<>();
+        if(innings.isEmpty())
+            return new HashMap<>();
         List<BattingScore> battingScores = battingScoreRepository.findByIid(innings.get(0).getIid());
-        result.put(1, battingScores);
+        result.put("Innings1", battingScores);
         if(innings.size()==1){
             return result;
         }
         List<BattingScore> battingScores2 = battingScoreRepository.findByIid(innings.get(1).getIid());
-        result.put(2, battingScores2);
+        result.put("Innings2", battingScores2);
         return result;
     }
 }

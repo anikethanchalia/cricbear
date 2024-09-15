@@ -5,6 +5,7 @@ import com.example.tournament.model.DTO.InningsDTO;
 import com.example.tournament.repository.BallByBallRepository;
 import com.example.tournament.repository.InningsRepository;
 import com.example.tournament.repository.TeamRepository;
+import jakarta.transaction.Transactional;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -26,7 +27,7 @@ public class BallByBallService {
 
     @Autowired
     private BallByBallRepository ballByBallRepository;
-    
+
     @Autowired
     private InningsRepository inningsRepository;
 
@@ -43,181 +44,244 @@ public class BallByBallService {
     BattingScoreService battingScoreService;
 
 
+    //Static variables
     public Thread taskThread;
-    public static ArrayList<Object> possibleOutcomes = new ArrayList<>(Arrays.asList(0, 1, 2, 3, 4, 5, 6, "W", Extra.WIDE, Extra.NOBALL));
+    public static final ArrayList<Object> possibleOutcomes = new ArrayList<>(Arrays.asList(0, 1, 2, 3, 4, 6, "W", Extra.WIDE, Extra.NOBALL));
     private static final Random RANDOM = new Random();
-    private static final long DELAY = 1000;
+    private static final long DELAY = 2000;
     public static boolean enabled = false;
-    public static boolean enabled2 = false;
-    //    private BallByBall ballByBall;
-    public static int target = Integer.MAX_VALUE;
-    public static int runs = 0;
-    public static int wickets = 0;
-    public static int overs = 0;
-    public static int ballNumber = 0;
-    public static int batter = 0;
+    protected static boolean enabled2 = false;
+    protected static int target = Integer.MAX_VALUE;
+    protected static int runs = 0;
+    protected static int wickets = 0;
+    protected static int overs = 0;
+    protected static int ballNumber = 0;
+    protected static int batterScore = 0;
     public static List<String> playing11;
-    public static List<String> bowler;
-    public static int iid;
-    public static String batsman1Id;
-    public static String batsman2Id;
-    public static String bowlerid;
-    public static Wicket wicket;
-    public static boolean isNoBall;
+    protected static List<String> bowler;
+    protected static int iid;
+    public static String batsman1Name;
+    public static String batsman2Name;
+    public static String bowlerName;
+    protected static Wicket wicketType;
+    protected static boolean isNoBall;
 
     @Autowired
     private BowlingScoreService bowlingScoreService;
 
 
-    public void createBattingScorecard(List<String> playing11Team){
-        battingScoreService.create(playing11Team,iid);
+    //Create the batting scorecard for that innings.
+    public void createBattingScorecard(List<String> playing11Team) {
+        battingScoreService.create(playing11Team, iid);
     }
 
-    public void createBowlingScorecard(List<String> bowlerTeam){
-        bowlingScoreService.create(bowlerTeam,iid);
+    //Create the bowling Scorecard.
+    public void createBowlingScorecard(List<String> bowlerTeam) {
+        bowlingScoreService.create(bowlerTeam, iid);
     }
 
+    //Set the static variable values.
     public static void setStaticValues() {
         target = runs;
         runs = 0;
         BallByBallService.wickets = 0;
         BallByBallService.overs = 0;
         BallByBallService.ballNumber = 0;
-        batter = 0;
+        batterScore = 0;
         playing11 = playing11Team2;
-        BallByBallService.batsman1Id = playing11.get(batter);
-        batter++;
-        BallByBallService.batsman2Id = playing11.get(batter);
-        batter++;
-        bowler = bowler1;
-        BallByBallService.bowlerid = bowler.get(RANDOM.nextInt(bowler.size()));
-        bowler.remove(bowlerid);
+        BallByBallService.batsman1Name = playing11.get(batterScore);
+        batterScore++;
+        BallByBallService.batsman2Name = playing11.get(batterScore);
+        batterScore++;
+        bowler = bowlersTeam1;
+        BallByBallService.bowlerName = bowler.get(RANDOM.nextInt(bowler.size()));
+        bowler.remove(bowlerName);
     }
 
+    //Random value from te RANDOM list.
     public static <T extends Enum<T>> T getRandomEnum(Class<T> clazz) {
         List<T> enumValues = Arrays.asList(clazz.getEnumConstants());
         int randomIndex = RANDOM.nextInt(enumValues.size());
         return enumValues.get(randomIndex);
     }
 
+    //Swap the batsmen.
     public static void swap() {
-        String temp = batsman1Id;
-        batsman1Id = batsman2Id;
-        batsman2Id = temp;
+        String temp = batsman1Name;
+        batsman1Name = batsman2Name;
+        batsman2Name = temp;
     }
 
+
+    //Update the scores of the players in a single transaction.
+    //TO DO : Optimisation given by geetanshu is to save the details of 3 balls once in a single transaction to reduce DB interactions. Do only after the entire project is completed and have time.
+    @Transactional
+    public void updateDataAsASingleTransaction(Long value, int wickets, int runsScored, int ballsFaced, int four, int six, boolean isOut) {
+        bowlingScoreService.update(bowlerName, value, ballByBallRepository.countByBowlerId(bowlerName, iid), wickets, iid);
+        bowlingScoreService.updatePlayerStatsForBowling(bowlerName, Math.toIntExact(value), ballByBallRepository.countByBowlerId(bowlerName, iid), wickets);
+        battingScoreService.updatePlayerStatsForBatting(batsman1Name, Math.toIntExact(value), ballsFaced, 0, 0, 0);
+        battingScoreService.update(batsman1Name, Math.toIntExact(value), ballsFaced, four, six, isOut, iid);
+    }
+
+
+    //Extras handler.
     public void extraScoreHandler(Extra value) {
         if (Extra.valueOf(value.toString()).equals(Extra.NOBALL)) {
             isNoBall = true;
         }
         runs++;
-        bowlingScoreService.update(new BowlingScore(bowlerid, 1L,ballByBallRepository.countByBowlerId(bowlerid,iid),0,iid),iid);
-        ballByBallRepository.save(new BallByBall(iid, overs, ballNumber, batsman1Id, batsman2Id, bowlerid, null, Extra.valueOf(value.toString()), null, runs, wickets));
+        bowlingScoreService.update(bowlerName, Long.valueOf(1), ballByBallRepository.countByBowlerId(bowlerName, iid), 0, iid);
+        ballByBallRepository.save(new BallByBall(iid, overs, ballNumber, batsman1Name, batsman2Name, bowlerName, null, Extra.valueOf(value.toString()), null, runs, wickets));
     }
 
-    public void wicketHandler(String value) {
+
+    //Wicket Handler.
+    public void wicketHandler() {
         if (!isNoBall) {
             wickets++;
-            wicket = getRandomEnum(Wicket.class);
+            wicketType = getRandomEnum(Wicket.class);
             ballNumber++;
-            bowlingScoreService.update(new BowlingScore(bowlerid, 0L,ballByBallRepository.countByBowlerId(bowlerid,iid),1,iid),iid);
-            bowlingScoreService.updatePlayerStatsForBowling(new BowlingScore(bowlerid, 0L,ballByBallRepository.countByBowlerId(bowlerid,iid),1,iid));
-            battingScoreService.update(new BattingScore(batsman1Id, 0L,1,true,iid),iid);
-            battingScoreService.updatePlayerStatsForBatting(battingScoreService.findByName(batsman1Id));
-            ballByBallRepository.save(new BallByBall(iid, overs, ballNumber, batsman1Id, batsman2Id, bowlerid, null, null, wicket, runs, wickets));
+            if (wicketType.equals(Wicket.RUNOUT)) {
+                updateDataAsASingleTransaction(0L, 0, 0, 1, 0, 0, true);
+            } else {
+                updateDataAsASingleTransaction(0L, 1, 0, 1, 0, 0, true);
+            }
+            ballByBallRepository.save(new BallByBall(iid, overs, ballNumber, batsman1Name, batsman2Name, bowlerName, null, null, wicketType, runs, wickets));
             if (wickets == 10) {
-                bowlingScoreService.updatePlayerStatsForBowling(bowlingScoreService.findByName(bowlerid));
-                battingScoreService.updatePlayerStatsForBatting(battingScoreService.findByName(batsman1Id));
-                battingScoreService.updatePlayerStatsForBatting(battingScoreService.findByName(batsman2Id));
                 return;
             } else {
-                batsman1Id = playing11.get(batter);
-                batter++;
+                batsman1Name = playing11.get(batterScore);
+                batterScore++;
             }
         } else {
             ballNumber++;
-            ballByBallRepository.save(new BallByBall(iid, overs, ballNumber, batsman1Id, batsman2Id, bowlerid, null, null, wicket, runs, wickets));
+            ballByBallRepository.save(new BallByBall(iid, overs, ballNumber, batsman1Name, batsman2Name, bowlerName, null, null, wicketType, runs, wickets));
         }
         isNoBall = false;
     }
 
+    //Runs scored handler.
     public void runsHandler(Integer value) {
-        Integer integer = (Integer) value;
-        runs += (Integer) value;
+        Integer four = 0;
+        Integer six = 0;
+        Integer integer = value;
+        runs += value;
+        if (value == 4)
+            four = 1;
+        if (value == 6)
+            six = 1;
         isNoBall = false;
         ballNumber++;
-        bowlingScoreService.update(new BowlingScore(bowlerid, value.longValue(), ballByBallRepository.countByBowlerId(bowlerid,iid),0,iid),iid);
-        bowlingScoreService.updatePlayerStatsForBowling(new BowlingScore(bowlerid, value.longValue(),ballByBallRepository.countByBowlerId(bowlerid,iid),0,iid));
-        battingScoreService.update(new BattingScore(batsman1Id, value.longValue(), 1,false,iid),iid);
-        ballByBallRepository.save(new BallByBall(iid, overs, ballNumber, batsman1Id, batsman2Id, bowlerid, integer, null, null, runs, wickets));
+        updateDataAsASingleTransaction(value.longValue(), 0, value, 1, four, six, false);
+        ballByBallRepository.save(new BallByBall(iid, overs, ballNumber, batsman1Name, batsman2Name, bowlerName, integer, null, null, runs, wickets));
         if (integer % 2 != 0) {
             swap();
         }
     }
 
+    //New Bowler selection after an over. No bowler can bowl two sonsecutive overs and more than 4 overs.
     public void overCompleteAndBowlerSelection() {
-        if (ballByBallRepository.countByBowlerId(bowlerid, iid) >= 4) {
-            bowlerid = null;
+        if (ballByBallRepository.countByBowlerId(bowlerName, iid) >= 4) {
+            bowlerName = null;
         }
         if (bowler.size() <= 2) {
-            bowler.addAll(batsmen2);
+            bowler.addAll(batsmenTeam2);
         }
         overs++;
         ballNumber = 0;
         String temp = bowler.get(RANDOM.nextInt(bowler.size()));
-        if (bowlerid != null)
-            bowler.add(bowlerid);
-        bowlerid = temp;
-        bowler.remove(bowlerid);
+        if (bowlerName != null)
+            bowler.add(bowlerName);
+        bowlerName = temp;
+        bowler.remove(bowlerName);
         swap();
     }
 
-    public void afterFirstInnings(){
-        double overToSave = Double.parseDouble(overs+"."+ballNumber);
-        Innings innings = new Innings(iid,MID,BATTING_ID,BOWLING_ID, runs, wickets, overToSave);
+    //Updating and swaping the teams after the first innings.
+    public void afterFirstInnings() {
+        double overToSave = Double.parseDouble(overs + "." + ballNumber);
+        Innings innings = new Innings(iid, matchId, battingId, bowlingId, runs, wickets, overToSave);
         inningsRepository.save(innings);
-        Innings innings1 = new Innings(MID,BOWLING_ID, BATTING_ID);
+        Innings innings1 = new Innings(matchId, bowlingId, battingId);
         innings1 = inningsRepository.save(innings1);
         iid = innings1.getIid();
         setStaticValues();
         enabled = false;
-        enabled2=true;
+        enabled2 = true;
         stopTask1();
         startTask2();
     }
 
+    //Updating the match results and points after the match is over.
+    //TO DO: Optimise by reducing the DB interactions.
+    public void afterSecondInnings() {
+        double overToSave = Double.parseDouble(overs + "." + ballNumber);
+        Innings innings = new Innings(iid, matchId, bowlingId, battingId, runs, wickets, overToSave);
+        inningsRepository.save(innings);
+        setToNew();
+        teamService.updateAfterResultsForMatch(matchId);
+        Team teamBattingSecond = teamService.getById(bowlingId);
+        Team teamBattingFirst = teamService.getById(battingId);
+        if (target > 0) {
+            double nrr = 0;
+            if (target > 0 && target <= 25)
+                nrr = 0.1;
+            else if (target > 25 && target <= 50)
+                nrr = 0.2;
+            else
+                nrr = 0.3;
+            matchResultService.createMatchResult(new MatchResult(matchId, tossDecision, tossWinTeam, teamBattingFirst.getTeamId()));
+            teamService.updateAfterResults(teamBattingFirst, 1, 1, 0, 0, 0, 2, nrr);
+            teamService.updateAfterResults(teamBattingSecond, 1, 0, 1, 0, 0, 0, -nrr);
+        } else if (target < 0) {
+            double nrr = 0;
+            int winByWickets = 10 - wickets;
+            if (winByWickets > 0 && winByWickets <= 3)
+                nrr = 0.1;
+            else if (winByWickets > 3 && winByWickets <= 6)
+                nrr = 0.2;
+            else
+                nrr = 0.3;
+            matchResultService.createMatchResult(new MatchResult(matchId, tossDecision, tossWinTeam, teamBattingSecond.getTeamId()));
+            teamService.updateAfterResults(teamBattingSecond, 1, 1, 0, 0, 0, 2, nrr);
+            teamService.updateAfterResults(teamBattingFirst, 1, 0, 1, 0, 0, 0, -nrr);
 
-    public void calculateScore() throws InterruptedException {
-//        System.out.println("calculateScore method called");
-        if (!enabled) {
-            return;
+        } else {
+            teamService.updateAfterResults(teamBattingSecond, 1, 0, 0, 1, 0, 1, 0);
+            teamService.updateAfterResults(teamBattingFirst, 1, 0, 0, 1, 0, 1, 0);
         }
-        else {
+        enabled2 = false;
+        stopTask2();
+    }
+
+    //Score calculation of the first innings.
+    //TO DO: Optimisation - Merge the two innings in one method with the help of target == Integer.MAX_VALUE. Do only after the entire project is completed and have time.
+    public void calculateScoreForFirstinnings() throws InterruptedException {
+        if (!enabled) {
+        } else {
 
             if (overs < 20 && wickets < 10) {
 
                 Object value = possibleOutcomes.get(RANDOM.nextInt(possibleOutcomes.size()));
-                if(value instanceof Extra) {
+                if (value instanceof Extra) {
                     extraScoreHandler((Extra) value);
-                }
-                else if (value instanceof String) {
+                } else if (value instanceof String) {
                     if ("W".equals(value)) {
-                        wicketHandler(value.toString());
+                        wicketHandler();
                     }
-                }
-                else if (value instanceof Integer) {
+                } else if (value instanceof Integer) {
                     runsHandler((Integer) value);
                 }
                 if (ballNumber % 6 == 0 && ballNumber != 0) {
                     overCompleteAndBowlerSelection();
                 }
-            }
-            else {
+            } else {
                 afterFirstInnings();
             }
         }
     }
 
+    //Thread to start innings one.
     public void startTask1() {
         if (taskThread == null || !taskThread.isAlive()) {
             createBattingScorecard(playing11Team1);
@@ -225,7 +289,7 @@ public class BallByBallService {
             taskThread = new Thread(() -> {
                 while (enabled) {
                     try {
-                        calculateScore();
+                        calculateScoreForFirstinnings();
                         Thread.sleep(DELAY);
                     } catch (InterruptedException e) {
                         Thread.currentThread().interrupt(); // Restore interrupted status
@@ -237,6 +301,7 @@ public class BallByBallService {
         }
     }
 
+    //Stop the thread of innings one.
     public void stopTask1() {
         enabled = false;
         if (taskThread != null) {
@@ -250,6 +315,8 @@ public class BallByBallService {
         }
     }
 
+    //Score calculation of the first innings.
+    //Optimisation - Merge the score calculation in one method. Do only after the entire project is completed and have time.
     public void calculateScoreOfInnings2() throws InterruptedException {
         if (!enabled2) {
             return;
@@ -263,7 +330,7 @@ public class BallByBallService {
                     target--;
                 } else if (value instanceof String) {
                     if ("W".equals(value)) {
-                        wicketHandler(value.toString());
+                        wicketHandler();
                     }
                 } else if (value instanceof Integer) {
                     runsHandler((Integer) value);
@@ -272,47 +339,13 @@ public class BallByBallService {
                 if (ballNumber % 6 == 0 && ballNumber != 0) {
                     overCompleteAndBowlerSelection();
                 }
-            }else {
-                    double overToSave = Double.parseDouble(overs + "." + ballNumber);
-                    Innings innings = new Innings(iid, MID, BOWLING_ID, BATTING_ID, runs, wickets, overToSave);
-                    inningsRepository.save(innings);
-                    setToNew();
-                    teamService.updateAfterResultsForMatch(MID);
-                    Team teamBattingSecond = teamService.getById(BOWLING_ID);
-                    Team teamBattingFirst = teamService.getById(BATTING_ID);
-                    if (target > 0) {
-                        double nrr = 0;
-                        if (target > 0 && target <= 25)
-                            nrr = 0.1;
-                        else if (target > 25 && target <= 50)
-                            nrr = 0.2;
-                        else
-                            nrr = 0.3;
-                        matchResultService.createMatchResult(new MatchResult(MID, tossDecision, TOSS_WIN_TEAM, teamBattingFirst.getTeamId()));
-                        teamService.updateAfterResults(teamBattingFirst, 1, 1, 0, 0, 0, 2, nrr);
-                        teamService.updateAfterResults(teamBattingSecond, 1, 0, 1, 0, 0, 0, -nrr);
-                    } else if (target < 0) {
-                        double nrr = 0;
-                        int winByWickets = 10 - wickets;
-                        if (winByWickets > 0 && winByWickets <= 3)
-                            nrr = 0.1;
-                        else if (winByWickets > 3 && winByWickets <= 6)
-                            nrr = 0.2;
-                        else
-                            nrr = 0.3;
-                        matchResultService.createMatchResult(new MatchResult(MID, tossDecision, TOSS_WIN_TEAM, teamBattingSecond.getTeamId()));
-                        teamService.updateAfterResults(teamBattingSecond, 1, 1, 0, 0, 0, 2, nrr);
-                        teamService.updateAfterResults(teamBattingFirst, 1, 0, 1, 0, 0, 0, -nrr);
-
-                    } else {
-                        teamService.updateAfterResults(teamBattingSecond, 1, 0, 0, 1, 0, 1, 0);
-                        teamService.updateAfterResults(teamBattingFirst, 1, 0, 0, 1, 0, 1, 0);
-                    }
-                    enabled2 = false;
-                }
+            } else {
+                afterSecondInnings();
             }
         }
+    }
 
+    //Thread to start innings 2.
     public void startTask2() {
         createBattingScorecard(playing11Team2);
         createBowlingScorecard(bowler);
@@ -332,23 +365,36 @@ public class BallByBallService {
         }).start();
     }
 
-    //BallByBall display service
-    public Map<Integer, InningsDTO> getBallByBall(int mid){
+    //Stop the thread of second innnings.
+    public void stopTask2() {
+        enabled2 = false;
+        if (taskThread != null) {
+            taskThread.interrupt();
+            try {
+                taskThread.join();
+            } catch (InterruptedException e) {
+                Thread.currentThread().interrupt();
+            }
+        }
+    }
+
+    //BallByBall display service to send the data based on number of innings completed.
+    public Map<String, InningsDTO> getBallByBall(int mid){
         List<Innings> innings = inningsRepository.findByMid(mid);
-        Map<Integer, InningsDTO> result = new HashMap<>();
-        if(innings.size()==0)
-            return null;
+        Map<String, InningsDTO> result = new HashMap<>();
+        if(innings.isEmpty())
+            return new HashMap<>();
         String battingTeamName = teamService.getById(innings.getFirst().getBattingId()).getTeamName();
         String bowlingTeamName = teamService.getById(innings.getFirst().getBowlingId()).getTeamName();
         InningsDTO inningsDTO1 = new InningsDTO(mid, battingTeamName, bowlingTeamName, ballByBallRepository.findByIid(innings.getFirst().getIid()));
-        result.put(1, inningsDTO1);
+        result.put("Innings1", inningsDTO1);
         if(innings.size()==1){
             return result;
         }
         battingTeamName = teamService.getById(innings.getLast().getBattingId()).getTeamName();
         bowlingTeamName = teamService.getById(innings.getLast().getBowlingId()).getTeamName();
         InningsDTO inningsDTO2 = new InningsDTO(mid, battingTeamName, bowlingTeamName, ballByBallRepository.findByIid(innings.getLast().getIid()));
-        result.put(2, inningsDTO2);
+        result.put("Innings2", inningsDTO2);
         return result;
     }
 }

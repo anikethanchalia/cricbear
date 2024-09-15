@@ -7,13 +7,10 @@ import org.junit.jupiter.api.Test;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers;
-import org.springframework.test.web.servlet.result.MockMvcResultHandlers;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -45,7 +42,7 @@ public class TeamControllerTest {
         Team team = new Team();
         team.setTeamName("Team A");
 
-        when(teamService.create(any(Team.class))).thenReturn(team);
+        when(teamService.createTeam(any(Team.class))).thenReturn(team);
 
         mockMvc.perform(MockMvcRequestBuilders.post("/team/create")
                         .contentType("application/json")

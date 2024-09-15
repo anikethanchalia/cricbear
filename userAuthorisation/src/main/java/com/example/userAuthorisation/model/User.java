@@ -5,18 +5,21 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+
 @Entity
 @Table(name = "user")
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
+//Represents a user.
 public class User {
-    @Column(name = "uid")
+
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Column(name = "uid")
     private int uid;
 
-    @Column(name = "username",unique = true)
+    @Column(name = "username", unique = true)
     private String username;
 
     @Column(name = "password")
@@ -35,6 +38,7 @@ public class User {
     @Enumerated(EnumType.STRING)
     private Role role;
 
+    //Constructor
     public User(String username, String password, String firstName, String lastName, String email, Role role) {
         this.username = username;
         this.password = password;
@@ -43,5 +47,4 @@ public class User {
         this.email = email;
         this.role = role;
     }
-
 }

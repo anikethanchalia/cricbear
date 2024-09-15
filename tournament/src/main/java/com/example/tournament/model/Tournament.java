@@ -4,9 +4,9 @@ import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-
 import java.time.LocalDateTime;
 
+//For tournament table.
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
@@ -14,10 +14,11 @@ import java.time.LocalDateTime;
 @Table(name = "tournament")
 public class Tournament {
 
+    //Tournament ID
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "tid")
-    private int tid;
+    private Integer tid;
 
     @Column(name = "t_name")
     private String tournamentName;
@@ -33,8 +34,9 @@ public class Tournament {
     private Status status;
 
     @Column(name = "uid")
-    private int uid;
+    private Integer uid;
 
+    //Constructor
     public Tournament(String tournamentName, LocalDateTime startDate, LocalDateTime endDate, Status status) {
         this.tournamentName = tournamentName;
         this.startDate = startDate;

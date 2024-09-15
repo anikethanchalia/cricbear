@@ -36,6 +36,9 @@ public class Player {
     @Enumerated(EnumType.STRING)
     private PlayerRole playerRole;
 
+    @Column(name = "flag")
+    private boolean flag;
+
 
     // Constructor with all fields except ID
     public Player(String name, boolean overseas, PlayerRole playerRole) {

@@ -37,7 +37,7 @@ public class RegTeamControllerTest {
         regTeam.setTid(1);
         regTeam.setTeamid(101);
 
-        when(regTeamService.addRegTeam(any(RegTeam.class))).thenReturn(regTeam);
+        when(regTeamService.addTeamToTournament(any(RegTeam.class))).thenReturn(regTeam);
 
         ResponseEntity<RegTeam> response = regTeamController.addRegTeam(regTeam);
 
@@ -51,7 +51,7 @@ public class RegTeamControllerTest {
         regTeam.setTid(1);
         regTeam.setTeamid(101);
 
-        when(regTeamService.addRegTeam(any(RegTeam.class))).thenReturn(null);
+        when(regTeamService.addTeamToTournament(any(RegTeam.class))).thenReturn(null);
 
         ResponseEntity<RegTeam> response = regTeamController.addRegTeam(regTeam);
 

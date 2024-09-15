@@ -2,11 +2,12 @@ package com.example.tournament.config;
 
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.scheduling.concurrent.ThreadPoolTaskScheduler;
 
+//For threads
 @Configuration
 public class SchedulerConfig {
 
+    //Provides a new thread
     @Bean
     public Thread thread() {
         return new Thread();

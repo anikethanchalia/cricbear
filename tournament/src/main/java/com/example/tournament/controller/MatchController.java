@@ -11,15 +11,15 @@ import org.springframework.web.bind.annotation.*;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
 
 @RestController
 @RequestMapping("/match")
-@CrossOrigin(origins = {"http://localhost:3000", "http://localhost:3001", "*"})
+@CrossOrigin(origins = {"http://localhost:3000", "http://localhost:3001"})
 public class MatchController {
     @Autowired
     private MatchService matchService;
 
+    //Generate the schedule of the tournament.
     @GetMapping("/schedule/{tid}/{uid}")
     public ResponseEntity<ArrayList<Match>> schedule(@PathVariable int tid, @PathVariable int uid) {
         try {
@@ -31,6 +31,7 @@ public class MatchController {
         }
     }
 
+    //Generate the semi-final schedule.
     @GetMapping("/semi/{tid}/{uid}")
     public ResponseEntity<ArrayList<Match>> semiFinal(@PathVariable int tid, @PathVariable int uid) {
         try {
@@ -41,6 +42,7 @@ public class MatchController {
         }
     }
 
+    //Start a match with match id.
     @GetMapping("/start/{mid}")
     public ResponseEntity<String> start(@PathVariable int mid) {
         try {
@@ -51,6 +53,7 @@ public class MatchController {
         }
     }
 
+    //Schedule the finals.
     @GetMapping("/final/{tid}/{uid}")
     public ResponseEntity<Match> finalMatch(@PathVariable int tid, @PathVariable int uid) {
         try {
@@ -61,10 +64,11 @@ public class MatchController {
         }
     }
 
+    //Update only final and semi final.
     @GetMapping("/update/{mid}")
     public ResponseEntity<Match> update(@PathVariable int mid, @RequestBody Match match) {
         try{
-            Match updatedMatch = matchService.updateMatch(mid,match);
+            Match updatedMatch = matchService.updateMatchIfEligible(mid,match);
             return new ResponseEntity<>(updatedMatch, HttpStatus.OK);
         }
         catch(Exception e){
@@ -72,11 +76,13 @@ public class MatchController {
         }
     }
 
+    //get matches by status.
     @GetMapping("/status/{status}")
     public ResponseEntity<List<MatchDTO>> status(@PathVariable MatchStatus status) {
-        return new ResponseEntity<>(matchService.findByStatus(status),HttpStatus.OK);
+        return new ResponseEntity<>(matchService.getMatchesByStatus(status),HttpStatus.OK);
     }
 
+    //Get matches in a particular tournament.
     @GetMapping("/getByTid/{tid}")
     public ResponseEntity<List<MatchDTO>> getByTid(@PathVariable int tid) {
         return new ResponseEntity<>(matchService.findAllByTid(tid),HttpStatus.OK);

@@ -13,7 +13,6 @@ import java.util.List;
 import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.*;
-import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
 
@@ -40,7 +39,7 @@ public class RegTeamServiceTest {
         when(regTeamRepository.countByTid(1)).thenReturn(2);
         when(regTeamRepository.save(any(RegTeam.class))).thenReturn(regTeam);
 
-        RegTeam result = regTeamService.addRegTeam(regTeam);
+        RegTeam result = regTeamService.addTeamToTournament(regTeam);
 
         assertNotNull(result);
         assertEquals(1, result.getGroupNumber());
@@ -54,7 +53,7 @@ public class RegTeamServiceTest {
 
         when(regTeamRepository.findByTidAndTeamId(1, 101)).thenReturn(new RegTeam());
 
-        RegTeam result = regTeamService.addRegTeam(regTeam);
+        RegTeam result = regTeamService.addTeamToTournament(regTeam);
 
         assertNull(result);
     }
@@ -68,7 +67,7 @@ public class RegTeamServiceTest {
         when(regTeamRepository.findByTidAndTeamId(1, 101)).thenReturn(null);
         when(regTeamRepository.countByTid(1)).thenReturn(7);
 
-        RegTeam result = regTeamService.addRegTeam(regTeam);
+        RegTeam result = regTeamService.addTeamToTournament(regTeam);
 
         assertNull(result);
     }
@@ -141,23 +140,5 @@ public class RegTeamServiceTest {
         regTeamService.deleteRegTeam(1);
 
         verify(regTeamRepository, times(1)).deleteById(1);
-    }
-
-    @Test
-    public void testRegTeam_Success() {
-        when(regTeamRepository.countByTid(1)).thenReturn(5);
-
-        String result = regTeamService.regTeam(1, 101);
-
-        assertEquals("Registered Successfully", result);
-    }
-
-    @Test
-    public void testRegTeam_Full() {
-        when(regTeamRepository.countByTid(1)).thenReturn(6);
-
-        String result = regTeamService.regTeam(1, 101);
-
-        assertEquals("Tournament limit reached!", result);
     }
 }

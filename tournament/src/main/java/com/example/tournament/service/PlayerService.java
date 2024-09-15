@@ -1,7 +1,5 @@
 package com.example.tournament.service;
 import com.example.tournament.model.Player;
-import com.example.tournament.model.Status;
-import com.example.tournament.model.Tournament;
 import com.example.tournament.repository.PlayerRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -10,21 +8,23 @@ import java.util.List;
 
 @Service
 public class PlayerService {
+
     @Autowired
     private PlayerRepository playerRepository;
 
+    //Create a new player.
     public Player create(Player player) {
         if (playerRepository.findByName(player.getName()) == null)
             return playerRepository.save(player);
         return null;
     }
 
+    //List of all players in the database.
     public List<Player> getAll() {
         return playerRepository.findAll();
     }
 
-
-
+    //Update the details of an existing player.
     public Player update(int playerId, Player updatedPlayer) {
         // Retrieve the existing player by ID
         Player existingPlayer = playerRepository.findById(playerId)
@@ -37,14 +37,9 @@ public class PlayerService {
         return playerRepository.save(existingPlayer);
     }
 
-
-    public String delete(String Name) {
-        playerRepository.deleteByName(Name);
+    //Delete a player.
+    public String delete(String playerName) {
+        playerRepository.deleteByName(playerName);
         return "Player deleted";
     }
-
-    public Integer getPlayerByName(String name) {
-        return playerRepository.findByName(name).getPid();
-    }
-
 }

@@ -16,15 +16,15 @@ import java.util.Map;
 @RequestMapping("/bowlingScore")
 @CrossOrigin(origins = {"http://localhost:3000", "http://localhost:3001", "*"})
 public class BowlingScoreController {
-    @Autowired
-    private BattingScoreService battingScoreService;
+
     @Autowired
     private BowlingScoreService bowlingScoreService;
 
+    //Get the bowling scorecard for a match.
     @GetMapping("/{mid}")
     public ResponseEntity<?> getBallByBall(@PathVariable Integer mid) {
         try {
-            Map<Integer, List<BowlingScore>> bowlingScoresData = bowlingScoreService.getAllDataByMid(mid);
+            Map<String, List<BowlingScore>> bowlingScoresData = bowlingScoreService.getAllDataByMid(mid);
 
             if (bowlingScoresData == null || bowlingScoresData.isEmpty()) {
                 return new ResponseEntity<>("No data found for the provided match ID", HttpStatus.NOT_FOUND);

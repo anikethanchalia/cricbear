@@ -25,16 +25,24 @@ public class BattingScore {
     @Column(name = "balls_faced", columnDefinition = "int default 0")
     private Integer ballsFaced;
 
+    @Column(name = "fours")
+    private Integer fours;
+
+    @Column(name = "six")
+    private Integer six;
+
     @Column(name = "is_out", columnDefinition = "boolean default false")
     private Boolean isOut;
 
     @Column(name = "iid")
     private Integer iid;
 
-    public BattingScore(String bs, Long runsScored, int ballsFaced, boolean isOut, Integer iid) {
+    public BattingScore(String bs, Long runsScored, int ballsFaced,int fours, int six, boolean isOut, Integer iid) {
         this.playerName = bs;
         this.runsScored = runsScored;
         this.ballsFaced = ballsFaced;
+        this.fours = fours;
+        this.six = six;
         this.isOut = isOut;
         this.iid = iid;
     }

@@ -9,10 +9,11 @@ import java.util.List;
 
 @Repository
 public interface BattingScoreRepository extends JpaRepository<BattingScore, Integer> {
-    BattingScore findByPlayerName(String playerName);
 
+    //Find by player name and innings id.
     @Query("select bs from BattingScore bs where bs.playerName = :playerName and bs.iid = :iid")
     BattingScore findByNameAndIid(String playerName, Integer iid);
 
+    //Find by innings id.
     List<BattingScore> findByIid(Integer iid);
 }

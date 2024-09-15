@@ -16,4 +16,9 @@ public class PlayerTeamDTO {
     private String name;
     private boolean overseas;
     private PlayerRole playerRole;
+    private int runsScored;
+    private int balls;
+    private int wickets;
+    private double overs;
+    private int runsGiven;
 }

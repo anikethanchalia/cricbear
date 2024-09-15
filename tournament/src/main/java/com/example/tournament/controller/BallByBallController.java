@@ -7,7 +7,6 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.List;
 import java.util.Map;
 
 @RestController
@@ -18,10 +17,11 @@ public class BallByBallController {
     @Autowired
     private BallByBallService ballByBallService;
 
+    //Get the ball-by-ball updates for a match.
     @GetMapping("/{mid}")
     public ResponseEntity<?> getBallByBall(@PathVariable Integer mid) {
         try {
-            Map<Integer, InningsDTO> ballByBallData = ballByBallService.getBallByBall(mid);
+            Map<String, InningsDTO> ballByBallData = ballByBallService.getBallByBall(mid);
 
             if (ballByBallData == null || ballByBallData.isEmpty()) {
                 return new ResponseEntity<>("No data found for the provided match ID", HttpStatus.NOT_FOUND);

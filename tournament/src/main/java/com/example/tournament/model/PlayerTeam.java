@@ -5,6 +5,7 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+//
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
@@ -15,13 +16,13 @@ public class PlayerTeam {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "tpid")
-    private int tpid;
+    private Integer tpid;
 
     @Column(name = "pid")
-    private int pid;
+    private Integer pid;
 
     @Column(name = "teamid")
-    private int teamId;
+    private Integer teamId;
 
     @Column(name = "overseas")
     private boolean overseas;
@@ -33,36 +34,21 @@ public class PlayerTeam {
 
 
     @Column(name = "runs_scored")
-    private int runsScored;
+    private Integer runsScored;
 
     @Column(name = "balls")
-    private int balls;
+    private Integer balls;
 
     @Column(name = "wickets")
-    private int wickets;
+    private Integer wickets;
 
     @Column(name = "overs")
     private double overs;
 
     @Column(name = "runs_given")
-    private int runsGiven;
+    private Integer runsGiven;
 
-//    // Constructor with all fields except ID
-//    public PlayerTeam(Player player, Team team, int runsScored, int balls, int wickets, double overs, int runsGiven) {
-//        this.player = player;
-//        this.team = team;
-//        this.runsScored = runsScored;
-//        this.balls = balls;
-//        this.wickets = wickets;
-//        this.overs = overs;
-//        this.runsGiven = runsGiven;
-//    }
-    public PlayerTeam(int runsScored, int balls,int wickets,double overs,int runsGiven){
-        this.runsScored = runsScored;
-        this.balls = balls;
-        this.wickets = wickets;
-        this.overs = overs;
-        this.runsGiven = runsGiven;
-    }
+    @Column(name = "flag")
+    private boolean flag;
 
 }

@@ -52,16 +52,6 @@ public class PlayerTeamController {
         }
     }
 
-    // Update an existing player team by ID
-//    @PutMapping("/{tpid}")
-//    public ResponseEntity<PlayerTeam> updatePlayerTeam(@PathVariable int tpid, @RequestBody PlayerTeam updatedPlayerTeam) {
-//        PlayerTeam updated = playerTeamService.updatePlayerTeam(tpid, updatedPlayerTeam);
-//        if (updated != null) {
-//            return new ResponseEntity<>(updated, HttpStatus.OK);
-//        } else {
-//            return new ResponseEntity<>(null,HttpStatus.NOT_FOUND);
-//        }
-//    }
 
     // Delete a player team by ID
     @DeleteMapping("/delete/{pid}")

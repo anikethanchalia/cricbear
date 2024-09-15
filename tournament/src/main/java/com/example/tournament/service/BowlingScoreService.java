@@ -1,7 +1,6 @@
 package com.example.tournament.service;
 
 import com.example.tournament.model.*;
-import com.example.tournament.repository.BallByBallRepository;
 import com.example.tournament.repository.BowlingScoreRepository;
 import com.example.tournament.repository.InningsRepository;
 import com.example.tournament.repository.PlayerRepository;
@@ -21,15 +20,16 @@ public class BowlingScoreService {
     private PlayerTeamService playerTeamService;
     @Autowired
     private PlayerRepository playerRepository;
-    @Autowired
-    private BallByBallRepository ballByBallRepository;
+
     @Autowired
     private InningsRepository inningsRepository;
 
+    //Get all rows.
     public List<BowlingScore> getAll() {
         return bowlingScoreRepository.findAll();
     }
 
+    //Create the rows for every bowler.
     public boolean create(List<String> bowlingScore, Integer iid) {
         for (String bs : bowlingScore) {
             bowlingScoreRepository.save(new BowlingScore(bs, 0L, 0,0, iid));
@@ -37,37 +37,36 @@ public class BowlingScoreService {
         return true;
     }
 
-    public void update(BowlingScore bowlingScore, Integer iid) {
-        BowlingScore existingBowlingScore = bowlingScoreRepository.findByNameAndIid(bowlingScore.getPlayerName(),iid);
+    //Update the scorecard of the bowler.
+    public void update(String bowlerId, Long value, int overs,int wickets,int iid) {
+        BowlingScore existingBowlingScore = bowlingScoreRepository.findByNameAndIid(bowlerId,iid);
         if (existingBowlingScore !=null) {
-            bowlingScoreRepository.save(new BowlingScore(existingBowlingScore.getBsid(), bowlingScore.getPlayerName(), bowlingScore.getRunsGiven()+ existingBowlingScore.getRunsGiven(),
-                    existingBowlingScore.getWickets() + bowlingScore.getWickets(),
-                     bowlingScore.getOvers(),iid));
+            existingBowlingScore.setOvers(overs);
+            existingBowlingScore.setRunsGiven(existingBowlingScore.getRunsGiven()+value);
+            existingBowlingScore.setWickets(existingBowlingScore.getWickets()+wickets);
+            bowlingScoreRepository.save(existingBowlingScore);
         }
     }
 
-    public BowlingScore findByName(String playerName) {
-        return bowlingScoreRepository.findByPlayerName(playerName);
+    //Update the player stats for that team.
+    public void updatePlayerStatsForBowling(String bowlerid,int value,int overs,int wickets) {
+        Player player = playerRepository.findByName(bowlerid);
+        playerTeamService.updatePlayerTeam(0,1,wickets,overs,value,player.getPid());
     }
 
-    public void updatePlayerStatsForBowling(BowlingScore bowlingScore) {
-        Player player = playerRepository.findByName(bowlingScore.getPlayerName());
-        playerTeamService.updatePlayerTeam(new PlayerTeam(Math.toIntExact(0), 1, bowlingScore.getWickets(), ballByBallRepository.countByBowlerId(bowlingScore.getPlayerName(), bowlingScore.getIid()), Math.toIntExact(bowlingScore.getRunsGiven())),player.getPid());
-    }
-
-    public Map<Integer, List<BowlingScore>> getAllDataByMid(int mid){
+    //Get the data of both innings by match id.
+    public Map<String, List<BowlingScore>> getAllDataByMid(int mid){
         List<Innings> innings = inningsRepository.findByMid(mid);
-        Map<Integer, List<BowlingScore>> result = new HashMap<>();
-        if(innings.size()==0)
-            return null;
-        List<BowlingScore> battingScores = bowlingScoreRepository.findByIid(innings.get(0).getIid());
-        result.put(1, battingScores);
+        Map<String, List<BowlingScore>> result = new HashMap<>();
+        if(innings.isEmpty())
+            return new HashMap<>();
+        List<BowlingScore> bowlingScores = bowlingScoreRepository.findByIid(innings.get(0).getIid());
+        result.put("Innings1", bowlingScores);
         if(innings.size()==1){
             return result;
         }
-        List<BowlingScore> battingScores2 = bowlingScoreRepository.findByIid(innings.get(1).getIid());
-        result.put(2, battingScores2);
+        List<BowlingScore> bowlingScores2 = bowlingScoreRepository.findByIid(innings.get(1).getIid());
+        result.put("Innings2", bowlingScores2);
         return result;
     }
 }
-

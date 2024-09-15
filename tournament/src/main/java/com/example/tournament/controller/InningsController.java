@@ -12,8 +12,9 @@ public class InningsController {
     @Autowired
     private InningsService inningsService;
 
+    //Toss setup for a particular match with match id mid.
     @GetMapping("/{mid}")
     public void tossDecision(@PathVariable int mid) throws InterruptedException {
-        inningsService.startMatch(mid);
+        inningsService.startMatchWithTossAndSetup(mid);
     }
 }

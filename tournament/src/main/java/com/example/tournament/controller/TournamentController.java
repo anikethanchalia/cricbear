@@ -4,6 +4,7 @@ import com.example.tournament.model.Match;
 import com.example.tournament.model.Tournament;
 import com.example.tournament.service.MatchService;
 import com.example.tournament.service.TournamentService;
+import jakarta.annotation.Nullable;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -23,17 +24,18 @@ public class TournamentController {
     @Autowired
     private MatchService matchService;
 
+    //To create a new tournament.
     @PostMapping("/create")
     public ResponseEntity<?> create(@RequestBody Tournament tournament) {
-        System.out.println(tournament);
         if (tournament.getTournamentName() == null || tournament.getTournamentName().isEmpty()) {
             return ResponseEntity.badRequest().body("Tournament name cannot be null or empty.");
         }
 
-        Tournament createdTournament = tournamentService.create(tournament);
+        Tournament createdTournament = tournamentService.createTournament(tournament);
         return ResponseEntity.ok(createdTournament);
     }
 
+    //Update a Tournament.
     @PutMapping("/update/{uid}")
     public ResponseEntity<Tournament> update(@RequestBody Tournament tournament,@PathVariable int uid) {
         Tournament updatedTournament = tournamentService.update(tournament,uid);
@@ -44,6 +46,7 @@ public class TournamentController {
         }
     }
 
+    //Get a tournament by id.
     @GetMapping("/getById/{id}")
     public ResponseEntity<Tournament> getById(@PathVariable Integer id) {
         Tournament tournament = tournamentService.getById(id);
@@ -54,28 +57,32 @@ public class TournamentController {
         }
     }
 
+    //Get all tournaments.
     @GetMapping("/getAll")
     public ResponseEntity<List<Tournament>> getAll() {
         List<Tournament> tournaments = tournamentService.getAll();
         return new ResponseEntity<>(tournaments, HttpStatus.OK);
     }
 
+    //Delete a Tournament.
     @DeleteMapping("/delete/{id}")
-    public ResponseEntity<?> delete(@PathVariable Integer id) {
+    public ResponseEntity<String> delete(@PathVariable Integer id) {
         tournamentService.delete(id);
         return new ResponseEntity<>("Deleted Successfully", HttpStatus.OK);
     }
 
+    //Get by LIVE,UPCOMING,COMPLETED
     @PostMapping("/getByStatus")
     public ResponseEntity<List<Tournament>> getByStatus(@RequestBody Map<String, String> status) {
-        List<Tournament> tournaments = tournamentService.getByStatus(status.get("status"));
-        if (tournaments.isEmpty()) {
+        List<Tournament> allTournaments = tournamentService.getByStatus(status.get("status"));
+        if (allTournaments.isEmpty()) {
             return new ResponseEntity<>(null,HttpStatus.NO_CONTENT);
         } else {
-            return new ResponseEntity<>(tournaments, HttpStatus.OK);
+            return new ResponseEntity<>(allTournaments, HttpStatus.OK);
         }
     }
 
+    //Start a tournament and return list of scheduled matches.
     @PostMapping("/start")
     public ResponseEntity<ArrayList<Match>> start(@RequestBody Map<String, Integer> tournament) {
         boolean success = tournamentService.start(tournament.get("tid"), tournament.get("uid"));
@@ -86,6 +93,7 @@ public class TournamentController {
             return new ResponseEntity<>(null,HttpStatus.NOT_FOUND);
     }
 
+    //Get by tid.
     @GetMapping("/getByTid/{tid}")
     public ResponseEntity<Tournament> getByTid(@PathVariable Integer tid) {
         Tournament tournament = tournamentService.getByTid(tid);

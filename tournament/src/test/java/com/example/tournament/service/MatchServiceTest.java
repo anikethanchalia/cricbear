@@ -1,13 +1,8 @@
 package com.example.tournament.service;
 
 import com.example.tournament.model.*;
-import com.example.tournament.model.DTO.MatchDTO;
-import com.example.tournament.model.DTO.MatchSemiDTO;
-import com.example.tournament.model.DTO.MatchSemiDTOComparator;
-import com.example.tournament.model.DTO.MatchSemiDTOConverter;
 import com.example.tournament.repository.MatchRepository;
 import com.example.tournament.repository.TeamRepository;
-import com.example.tournament.service.*;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.InjectMocks;
@@ -16,9 +11,7 @@ import org.mockito.MockitoAnnotations;
 import org.springframework.boot.test.context.SpringBootTest;
 
 import java.time.LocalDateTime;
-import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 
@@ -144,7 +137,7 @@ public class MatchServiceTest {
         assertEquals(MatchStatus.LIVE, match.getStatus());
         verify(matchRepository).getByMid(mid);
         verify(matchRepository).save(match);
-        verify(inningsService).startMatch(mid);
+        verify(inningsService).startMatchWithTossAndSetup(mid);
     }
 
     @Test
@@ -163,7 +156,7 @@ public class MatchServiceTest {
         assertNull(result);
         verify(matchRepository).getByMid(mid);
         verify(matchRepository, never()).save(match);
-        verify(inningsService, never()).startMatch(mid);
+        verify(inningsService, never()).startMatchWithTossAndSetup(mid);
     }
 
 
@@ -207,7 +200,7 @@ public class MatchServiceTest {
     }
 
     @Test
-    public void testUpdateMatch_Success() {
+    public void testUpdateMatch_IfEligible_Success() {
         // Arrange
         int mid = 1;
         Match match = new Match();
@@ -219,7 +212,7 @@ public class MatchServiceTest {
         when(matchRepository.save(match)).thenReturn(match);
 
         // Act
-        Match result = matchService.updateMatch(mid, match);
+        Match result = matchService.updateMatchIfEligible(mid, match);
 
         // Assert
         assertNotNull(result);

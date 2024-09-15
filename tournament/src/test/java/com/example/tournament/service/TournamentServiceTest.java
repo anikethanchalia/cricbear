@@ -10,9 +10,7 @@ import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 import org.springframework.test.context.junit.jupiter.SpringJUnitConfig;
 
-import java.time.LocalDate;
 import java.time.LocalDateTime;
-import java.time.format.DateTimeFormatter;
 import java.util.Arrays;
 import java.util.List;
 
@@ -34,7 +32,7 @@ public class TournamentServiceTest {
     }
 
     @Test
-    public void testCreate_Success() {
+    public void testCreate_Tournament_Success() {
         Tournament tournament = new Tournament();
         tournament.setTournamentName("Test Tournament");
         tournament.setStartDate(LocalDateTime.now().minusDays(15));
@@ -43,14 +41,14 @@ public class TournamentServiceTest {
         when(tournamentRepository.findByTournamentName("Test Tournament")).thenReturn(null);
         when(tournamentRepository.save(tournament)).thenReturn(tournament);
 
-        Tournament createdTournament = tournamentService.create(tournament);
+        Tournament createdTournament = tournamentService.createTournament(tournament);
 
         assertNotNull(createdTournament);
         assertEquals("Test Tournament", createdTournament.getTournamentName());
     }
 
     @Test
-    public void testCreate_Failure_DurationTooShort() {
+    public void testCreate_Tournament_Failure_DurationTooShort() {
         Tournament tournament = new Tournament();
         tournament.setTournamentName("Short Tournament");
         tournament.setStartDate(LocalDateTime.now().minusDays(5));
@@ -58,19 +56,19 @@ public class TournamentServiceTest {
 
         when(tournamentRepository.findByTournamentName("Short Tournament")).thenReturn(null);
 
-        Tournament createdTournament = tournamentService.create(tournament);
+        Tournament createdTournament = tournamentService.createTournament(tournament);
 
         assertNull(createdTournament);
     }
 
     @Test
-    public void testCreate_Failure_NameExists() {
+    public void testCreate_Tournament_Failure_NameExists() {
         Tournament tournament = new Tournament();
         tournament.setTournamentName("Existing Tournament");
 
         when(tournamentRepository.findByTournamentName("Existing Tournament")).thenReturn(new Tournament());
 
-        Tournament createdTournament = tournamentService.create(tournament);
+        Tournament createdTournament = tournamentService.createTournament(tournament);
 
         assertNull(createdTournament);
     }

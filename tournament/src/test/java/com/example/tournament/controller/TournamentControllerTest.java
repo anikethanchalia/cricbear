@@ -1,7 +1,5 @@
 package com.example.tournament.controller;
 
-import com.example.tournament.model.Match;
-import com.example.tournament.model.Status;
 import com.example.tournament.model.Tournament;
 import com.example.tournament.service.MatchService;
 import com.example.tournament.service.TournamentService;
@@ -10,14 +8,11 @@ import org.junit.jupiter.api.Test;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers;
 
-import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -50,7 +45,7 @@ public class TournamentControllerTest {
         Tournament tournament = new Tournament();
         tournament.setTournamentName("Test Tournament");
 
-        when(tournamentService.create(any(Tournament.class))).thenReturn(tournament);
+        when(tournamentService.createTournament(any(Tournament.class))).thenReturn(tournament);
 
         mockMvc.perform(MockMvcRequestBuilders.post("/tournament/create")
                         .contentType("application/json")

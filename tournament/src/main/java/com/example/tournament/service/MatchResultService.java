@@ -23,35 +23,53 @@ public class MatchResultService {
     @Autowired
     private InningsRepository inningsRepository;
 
+    //Create a new entry.
     public MatchResult createMatchResult(MatchResult matchResult) {
         return matchResultRepository.save(matchResult);
     }
 
+    //Get all rows in the table.
     public List<MatchResult> getAllMatchResults() {
         return matchResultRepository.findAll();
     }
+
+    //Get a match result by id.
     public MatchResult getMatchResultById(Integer id) {
         return matchResultRepository.findById(id).orElse(null);
     }
-    public MatchResult updateMatchResult(MatchResult matchResult) {
-        return matchResultRepository.save(matchResult);
+
+    //Update an existing match result.
+    public MatchResult updateMatchResult(MatchResult updateMatchResult) {
+        return matchResultRepository.save(updateMatchResult);
     }
+
+    //Delete.
     public void deleteMatchResult(MatchResult matchResult) {
         matchResultRepository.delete(matchResult);
     }
+
+    //Get by a particular match.
     public MatchResult getMatchResultByMatchId(Integer matchId) {
+
         return matchResultRepository.findByMid(matchId);
     }
 
+    //Get the results by match id.
     public MatchResultDTO getResultByMatchId(Integer matchId) {
-        MatchResult matches = matchResultRepository.findByMid(matchId);
+        MatchResult matchResult = matchResultRepository.findByMid(matchId);
         List<Innings> innings = inningsRepository.findByMid(matchId);
-        Innings firstInning =innings.get(0);
-        Innings secondInning =innings.get(1);
+        Innings firstInning;
+        Innings secondInning;
+        if(innings.size()==2) {
+            firstInning = innings.get(0);
+            secondInning = innings.get(1);
+        }
+        else
+            return null;
         return new MatchResultDTO(matchId,
-                matches.getTossDesicion(),
-                teamRepository.findByTeamId(matches.getTossWinTeam()).getTeamName(),
-                teamRepository.findByTeamId(matches.getWinnerId()).getTeamName(),
+                matchResult.getTossDesicion(),
+                teamRepository.findByTeamId(matchResult.getTossWinTeam()).getTeamName(),
+                teamRepository.findByTeamId(matchResult.getWinnerId()).getTeamName(),
                 teamRepository.findByTeamId(matchRepository.getByMid(matchId).getTeamId1()).getTeamName(),
                 teamRepository.findByTeamId(matchRepository.getByMid(matchId).getTeamId2()).getTeamName(),
                 teamRepository.findByTeamId(firstInning.getBattingId()).getTeamName(),
