@@ -17,6 +17,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 
 import java.time.LocalDateTime;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 
 
@@ -42,18 +43,19 @@ class NotificationControllerTest {
 
     @Test
     void testSendNotification() throws Exception {
+        // Create a sample notification object
         Notification notification = new Notification(1, "EMAIL", "Test message", LocalDateTime.now());
 
-        when(notificationService.sendNotification(1, "EMAIL", "Test message")).thenReturn(notification);
+        // Mock the service method to return a list containing the sample notification
+        when(notificationService.findWithCurrentDate(any(LocalDateTime.class)))
+                .thenReturn(Collections.singletonList(notification));
 
-        mockMvc.perform(post("/notifications/send")
-                        .param("uid", "1")
-                        .param("reminderType", "EMAIL")
-                        .param("message", "Test message"))
+        // Perform the POST request
+        mockMvc.perform(post("/notifications/send"))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.uid").value(1))
-                .andExpect(jsonPath("$.reminderType").value("EMAIL"))
-                .andExpect(jsonPath("$.message").value("Test message"));
+                .andExpect(jsonPath("$[0].uid").value(1))
+                .andExpect(jsonPath("$[0].reminderType").value("EMAIL"))
+                .andExpect(jsonPath("$[0].message").value("Test message"));
     }
 
     @Test

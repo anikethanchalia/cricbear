@@ -256,7 +256,7 @@ public class BallByBallService {
 
     //Score calculation of the first innings.
     //TO DO: Optimisation - Merge the two innings in one method with the help of target == Integer.MAX_VALUE. Do only after the entire project is completed and have time.
-    public void calculateScoreForFirstinnings() throws InterruptedException {
+    public void calculateScoreForFirstInnings() throws InterruptedException {
         if (!enabled) {
         } else {
 
@@ -289,7 +289,7 @@ public class BallByBallService {
             taskThread = new Thread(() -> {
                 while (enabled) {
                     try {
-                        calculateScoreForFirstinnings();
+                        calculateScoreForFirstInnings();
                         Thread.sleep(DELAY);
                     } catch (InterruptedException e) {
                         Thread.currentThread().interrupt(); // Restore interrupted status
@@ -319,7 +319,6 @@ public class BallByBallService {
     //Optimisation - Merge the score calculation in one method. Do only after the entire project is completed and have time.
     public void calculateScoreOfInnings2() throws InterruptedException {
         if (!enabled2) {
-            return;
         } else {
 
             if (overs < 20 && wickets < 10 && target >= 0) {

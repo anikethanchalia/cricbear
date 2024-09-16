@@ -9,17 +9,13 @@ import org.junit.jupiter.api.Test;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
-import org.springframework.web.context.WebApplicationContext;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
-import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
@@ -102,20 +98,6 @@ public class PlayerTeamControllerTest {
                 .andExpect(status().isInternalServerError());
     }
 
-
-//    @Test
-//    public void testUpdatePlayerTeam_NotFound() throws Exception {
-//        // Arrange
-//        int tpid = 1;
-//        PlayerTeam updatedPlayerTeam = new PlayerTeam();
-//        when(playerTeamService.updatePlayerTeam(tpid, updatedPlayerTeam)).thenReturn(null);
-//
-//        // Act & Assert
-//        mockMvc.perform(put("/playerTeams/{tpid}", tpid)
-//                        .contentType("application/json")
-//                        .content("{\"teamId\":1,\"pid\":1}"))
-//                .andExpect(status().isNotFound());
-//    }
 
     @Test
     public void testDeletePlayerTeam() throws Exception {

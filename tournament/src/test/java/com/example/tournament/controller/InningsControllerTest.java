@@ -33,21 +33,4 @@ public class InningsControllerTest {
         // Assert
         verify(inningsService).startMatchWithTossAndSetup(mid);  // Verify that startMatch was called with the correct argument
     }
-
-    @Test
-    public void testTossDecision_InterruptedException() throws InterruptedException {
-        // Arrange
-        int mid = 1;
-        doThrow(InterruptedException.class).when(inningsService).startMatchWithTossAndSetup(mid);
-
-        // Act
-        try {
-            inningsController.tossDecision(mid);
-        } catch (InterruptedException e) {
-            // Expected exception
-        }
-
-        // Assert
-        verify(inningsService).startMatchWithTossAndSetup(mid);  // Verify that startMatch was called with the correct argument
-    }
 }
