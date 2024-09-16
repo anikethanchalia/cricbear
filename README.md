@@ -7,10 +7,10 @@
     Contributions
 
     - User Authorisation Module - Complete module.
-    - Tournament Module         - All services except Player and PlayerTeam service.
+    - Tournament Module         - All services and changes made to Player and PlayerTeam services during integration.
     - Notification Module       - Changes made to the service while integration. 
     - Eureka Server and Gateway - Complete module.
-    - Testing                   - Complete User Authorisation module and 40% of Tournament module.
+    - Test Cases                - Complete User Authorisation module and 40% of Tournament module.
     - Integration of frontend and backend.
 
 - *Rakshitha C*
@@ -19,7 +19,7 @@
 
     - Tournament Module         - Player and PlayerTeam services.
     - Notification Module       - Complete module. 
-    - Testing                   - Complete Notification module and 60% of Tournament module.
+    - Test Cases                - Complete Notification module and 60% of Tournament module.
     - Integration of frontend and backend.
 
 - *Shreyansh Tripathi*
